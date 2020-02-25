@@ -1,22 +1,26 @@
-// spliceForTool.cpp : 定义 DLL 应用程序的导出函数。
-//
 
 #include "stdafx.h"
 #include "spliceForTool.h"
 
-
-// 这是导出变量的一个示例
-SPLICEFORTOOL_API int nspliceForTool=0;
-
-// 这是导出函数的一个示例。
-SPLICEFORTOOL_API int fnspliceForTool(void)
-{
-	return 42;
+// 1
+int dllStart(initTool p_initTool, setToTool p_setToTool,
+	setFinish p_setFinish, endTool p_endTool) {
+	return (Interface::getInstance().start(
+		p_initTool, p_setToTool,
+		p_setFinish, p_endTool) ? 1 : 0);
 }
 
-// 这是已导出类的构造函数。
-// 有关类定义的信息，请参阅 spliceForTool.h
-CspliceForTool::CspliceForTool()
-{
-	return;
+// 2
+int dllSetValue(char* name, void* data) {
+	return (Interface::getInstance().setValue(name, data) ? 1 : 0);
+}
+
+// 3
+int dllAdvance() {
+	return (Interface::getInstance().advance() ? 1 : 0);
+}
+
+// 4
+int dllEnd() {
+	return (Interface::getInstance().end() ? 1 : 0);
 }
