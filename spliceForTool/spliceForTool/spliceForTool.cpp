@@ -3,9 +3,10 @@
 #include "spliceForTool.h"
 
 // 1
-int dllStart(initTool p_initTool, setToTool p_setToTool,
+int dllStart(char* configName,
+	initTool p_initTool, setToTool p_setToTool,
 	setFinish p_setFinish, endTool p_endTool) {
-	return (Interface::getInstance().start(
+	return (Interface::getInstance().start(configName,
 		p_initTool, p_setToTool,
 		p_setFinish, p_endTool) ? 1 : 0);
 }

@@ -1,113 +1,107 @@
-﻿#include "csscenario_xml.h"
+﻿
+#include "stdafx.h"
+#include "csscenario_xml.h"
 
-#include <fstream>
-#include <unordered_map>
-#include <utility>
-
-#include <rapidxml_print.hpp>
-#include <rapidxml_utils.hpp>
-
-//#include "csentity/csentity.h"
-#include "xml_define.h"
-
-CSScenarioXML::CSScenarioXML(const std::string& xml_path):file_path_(xml_path) {
-  already_read_publish_subscribe_xml_ = false;
+CSScenarioXML::CSScenarioXML(const std::string& xml_path) :file_path_(xml_path) {
+	already_read_publish_subscribe_xml_ = false;
 }
-
 
 bool CSScenarioXML::ReadXML(const std::string& scenario_full_name) {
 
-  bool rv = false;
+	bool rv = false;
 
-  try {
-    rapidxml::file<> content(scenario_full_name.c_str());
+	try {
+		rapidxml::file<> content(scenario_full_name.c_str());
 
-    xml_document<> doc;
-    doc.parse<0>(content.data());
+		xml_document<> doc;
+		doc.parse<0>(content.data());
 
-    xml_node<char>* millitary_node = doc.first_node(u8"MilitaryScenario");
-    if (!millitary_node) {
-      return false;
-    }
+		xml_node<char>* millitary_node = doc.first_node("MilitaryScenario");
+		if (!millitary_node) {
+			return false;
+		}
 
-    ParserScenarioInfo(millitary_node);
+		ParserScenarioInfo(millitary_node);
 
-	//自定义类型
-	ParserTypeDefine(millitary_node);
+		//自定义类型
+		ParserTypeDefine(millitary_node);
 
-    //主题
-    ParserTopicDefine(millitary_node);
+		//主题
+		ParserTopicDefine(millitary_node);
 
-	//发布订阅关系
-    ParserPublishSubscribe(millitary_node);
+		//发布订阅关系
+		ParserPublishSubscribe(millitary_node);
 
-  } catch (const parse_error& e) {
-    std::string error_info = u8"解析想定XML出错，";
-    error_info += e.what();
-    //LogSEErr(error_info);
-    return false;
-  } catch (const std::exception& e) {
-    std::string error_info = u8"解析想定XML出错，";
-    error_info += e.what();
-	//std::cout << error_info;
-    //LogSEErr(error_info);
-    return false;
-  } catch (...) {
-    //LogSEErr(u8"解析想定XML出错");
-    return false;
-  }
+	}
+	catch (const parse_error& e) {
+		std::string error_info = "解析想定XML出错，";
+		error_info += e.what();
+		//LogSEErr(error_info);
+		return false;
+	}
+	catch (const std::exception& e) {
+		std::string error_info = "解析想定XML出错，";
+		error_info += e.what();
+		//std::cout << error_info;
+		//LogSEErr(error_info);
+		return false;
+	}
+	catch (...) {
+		//LogSEErr(u8"解析想定XML出错");
+		return false;
+	}
 
-  return true;
+	return true;
 }
 
 void CSScenarioXML::ParserScenarioInfo(xml_node<char>*& parent_node) {
-  xml_node<> *info_node = parent_node->first_node(u8"ScenarioInfo");
-  if (!info_node) {
-    return;
-  }
+	xml_node<> *info_node = parent_node->first_node("ScenarioInfo");
+	if (!info_node) {
+		return;
+	}
 
-  xml_node<> *name_node = info_node->first_node(u8"Name");
-  if (name_node) {
-    auto value = name_node->value();
-    if (value) {
-      //CSScenario::Instance().SetName(value);
-	  scenario_name_ = value;
-    }
-  }
+	xml_node<> *name_node = info_node->first_node("Name");
+	if (name_node) {
+		auto value = name_node->value();
+		if (value) {
+			//CSScenario::Instance().SetName(value);
+			scenario_name_ = value;
+		}
+	}
 
-  xml_node<> *id_node = info_node->first_node(u8"Id");
-  if (id_node) {
-    auto value = id_node->value();
-    if (value) {
-      //CSScenario::Instance().SetModifyTime(value);
-	  id_ = value;
-    }
-  }
+	xml_node<> *id_node = info_node->first_node("Id");
+	if (id_node) {
+		auto value = id_node->value();
+		if (value) {
+			//CSScenario::Instance().SetModifyTime(value);
+			id_ = value;
+		}
+	}
 
-  xml_node<> *node_node = info_node->first_node(u8"Node");
-  if (node_node) {
-    auto value = node_node->value();
-    if (value) {
-      //CSScenario::Instance().SetDescription(value);
-	  node_ = value;
-    }
-  }
+	xml_node<> *node_node = info_node->first_node("Node");
+	if (node_node) {
+		auto value = node_node->value();
+		if (value) {
+			//CSScenario::Instance().SetDescription(value);
+			node_ = value;
+		}
+	}
 }
 
 void CSScenarioXML::ParserTypeDefine(xml_node<char>*& parent_ndoe) {
 
-	xml_node<> *type_define_node = parent_ndoe->first_node(u8"TypeDefine");
+	xml_node<> *type_define_node = parent_ndoe->first_node("TypeDefine");
 	if (!type_define_node) {
 		return;
 	}
 
 	xml_attribute<> *att = nullptr;
 
-	for (auto it = type_define_node->first_node(u8"Type"); it;
+	for (auto it = type_define_node->first_node("Type"); it;
 		it = it->next_sibling()) {
 		TypeDefineInfo type_define_info;
 		//获取自定义类型名称
-		att = it->first_attribute(u8"name");
+		att = it->first_attribute("name");
 		if (att) {
 			type_define_info.type_name = att->value();
 		}
@@ -118,10 +112,10 @@ void CSScenarioXML::ParserTypeDefine(xml_node<char>*& parent_ndoe) {
 
 		//获取自定义类型参数
 		std::string param_name, param_type;
-		for (auto param = it->first_node(u8"Parameter"); param;
+		for (auto param = it->first_node("Parameter"); param;
 			param = param->next_sibling()) {
 			//参数名称
-			att = param->first_attribute(u8"name");
+			att = param->first_attribute("name");
 			if (att) {
 				param_name = att->value();
 			}
@@ -129,7 +123,7 @@ void CSScenarioXML::ParserTypeDefine(xml_node<char>*& parent_ndoe) {
 				continue;
 			}
 			//参数类型
-			att = param->first_attribute(u8"type");
+			att = param->first_attribute("type");
 			if (att) {
 				param_type = att->value();
 			}
@@ -145,18 +139,18 @@ void CSScenarioXML::ParserTypeDefine(xml_node<char>*& parent_ndoe) {
 
 void CSScenarioXML::ParserTopicDefine(xml_node<char>*& parent_ndoe) {
 
-	xml_node<> *topics_node = parent_ndoe->first_node(u8"Topics");
+	xml_node<> *topics_node = parent_ndoe->first_node("Topics");
 	if (!topics_node) {
 		return;
 	}
 
 	xml_attribute<> *att = nullptr;
 
-	for (auto it = topics_node->first_node(u8"Topic"); it;
+	for (auto it = topics_node->first_node("Topic"); it;
 		it = it->next_sibling()) {
 		TopicDefineInfo topic_define_info;
 		//获取主题名称
-		att = it->first_attribute(u8"name");
+		att = it->first_attribute("name");
 		if (att) {
 			topic_define_info.topic_name = att->value();
 		}
@@ -166,7 +160,7 @@ void CSScenarioXML::ParserTopicDefine(xml_node<char>*& parent_ndoe) {
 		}
 
 		//获取主题参数类型(主题名就是参数名，主题类型就是参数类型)
-		att = it->first_attribute(u8"type");
+		att = it->first_attribute("type");
 		if (att) {
 			topic_define_info.params[topic_define_info.topic_name] = att->value();
 		}
@@ -181,114 +175,118 @@ void CSScenarioXML::ParserTopicDefine(xml_node<char>*& parent_ndoe) {
 
 void CSScenarioXML::ParserTopics(xml_node<char>*& parent_ndoe) {
 
-  xml_node<> *topics_node = parent_ndoe->first_node(u8"Topics");
-  if (!topics_node) {
-    return;
-  }
+	xml_node<> *topics_node = parent_ndoe->first_node("Topics");
+	if (!topics_node) {
+		return;
+	}
 
-  xml_attribute<> *att = nullptr;
+	xml_attribute<> *att = nullptr;
 
-  for (auto it = topics_node->first_node(u8"Topic"); it;
-       it = it->next_sibling()) {
-    TopicInfo topic_info;
-    //获取主题名称
-    att = it->first_attribute(u8"name");
-    if (att) {
-      topic_info.topic_name = att->value();
-    } else {
-      //LogSEErr(u8"主题名称为空");
-      continue;
-    }
-    //获取主题类型
-    att = it->first_attribute(u8"type");
-    if (att) {
-      topic_info.topic_type = att->value();
-    } else {
-      //LogSEErr(u8"主题类型为空");
-      continue;
-    }
+	for (auto it = topics_node->first_node("Topic"); it;
+		it = it->next_sibling()) {
+		TopicInfo topic_info;
+		//获取主题名称
+		att = it->first_attribute("name");
+		if (att) {
+			topic_info.topic_name = att->value();
+		}
+		else {
+			//LogSEErr(u8"主题名称为空");
+			continue;
+		}
+		//获取主题类型
+		att = it->first_attribute("type");
+		if (att) {
+			topic_info.topic_type = att->value();
+		}
+		else {
+			//LogSEErr(u8"主题类型为空");
+			continue;
+		}
 
-    //获取主题参数
-    std::string param_name, param_type;
-    for (auto param = it->first_node(u8"Param"); param;
-         param = param->next_sibling()) {
-      //参数名称
-      att = param->first_attribute(u8"name");
-      if (att) {
-        param_name = att->value();
-      } else {
-        continue;
-      }
-      //参数类型
-      att = param->first_attribute(u8"type");
-      if (att) {
-        param_type = att->value();
-      } else {
-        continue;
-      }
+		//获取主题参数
+		std::string param_name, param_type;
+		for (auto param = it->first_node("Param"); param;
+			param = param->next_sibling()) {
+			//参数名称
+			att = param->first_attribute("name");
+			if (att) {
+				param_name = att->value();
+			}
+			else {
+				continue;
+			}
+			//参数类型
+			att = param->first_attribute("type");
+			if (att) {
+				param_type = att->value();
+			}
+			else {
+				continue;
+			}
 
-      topic_info.params.emplace(param_name, param_type);
-    }
-	topics_[topic_info.topic_name] = topic_info;
-  }
+			topic_info.params.emplace(param_name, param_type);
+		}
+		topics_[topic_info.topic_name] = topic_info;
+	}
 }
 
 void CSScenarioXML::ParserPublishSubscribe(xml_node<char>*& parent_node) {
 
-  xml_node<> *models_node = parent_node->first_node(u8"Models");
+	xml_node<> *models_node = parent_node->first_node("Models");
 
-  if (!models_node) {
-    return;
-  }
+	if (!models_node) {
+		return;
+	}
 
-  std::string model_name;
+	std::string model_name;
 
-  for (auto it = models_node->first_node(u8"Model"); it;
-       it = it->next_sibling()) {
+	for (auto it = models_node->first_node("Model"); it;
+		it = it->next_sibling()) {
 
-    xml_attribute<> *att = it->first_attribute(u8"name");
-    if (!att) {
-      continue;
-    }
+		xml_attribute<> *att = it->first_attribute("name");
+		if (!att) {
+			continue;
+		}
 
-    model_name = att->value();
+		model_name = att->value();
 
-    PubSubItem pub_sub_item;
-    std::string topic_name;
+		PubSubItem pub_sub_item;
+		std::string topic_name;
 
-    xml_node<> *pub_node = it->first_node(u8"Publish");
-    if (pub_node) {
-      //发布关系
-      for (auto pub_topic = pub_node->first_node(u8"Topic"); pub_topic;
-           pub_topic = pub_topic->next_sibling()) {
+		xml_node<> *pub_node = it->first_node("Publish");
+		if (pub_node) {
+			//发布关系
+			for (auto pub_topic = pub_node->first_node("Topic"); pub_topic;
+				pub_topic = pub_topic->next_sibling()) {
 
-        att = pub_topic->first_attribute(u8"topicName");
-        if (!att) {
-          continue;
-        }
-        topic_name = att->value();
-		pub_sub_item.publish.push_back(topic_name);
-      }
-    }
+				att = pub_topic->first_attribute("topicName");
+				if (!att) {
+					continue;
+				}
+				topic_name = att->value();
+				pub_sub_item.publish.push_back(topic_name);
+			}
+		}
 
-    xml_node<> *sub_node = it->first_node(u8"Subscribe");
-    if (sub_node) {
-      //订阅关系
-      for (auto sub_topic = sub_node->first_node(u8"Topic"); sub_topic;
-           sub_topic = sub_topic->next_sibling()) {
-        att = sub_topic->first_attribute(u8"topicName");
-        if (!att) {
-          continue;
-        }
-        topic_name = att->value();
+		xml_node<> *sub_node = it->first_node("Subscribe");
+		if (sub_node) {
+			//订阅关系
+			for (auto sub_topic = sub_node->first_node("Topic"); sub_topic;
+				sub_topic = sub_topic->next_sibling()) {
+				att = sub_topic->first_attribute("topicName");
+				if (!att) {
+					continue;
+				}
+				topic_name = att->value();
 
-		pub_sub_item.subscribe.push_back(topic_name);
-      }
-    }
+				pub_sub_item.subscribe.push_back(topic_name);
+			}
+		}
 
-	pub_sub_[model_name] = pub_sub_item;
-    //CSScenario::Instance().AddModelPublishSubscribe(model_uuid, std::move(pub_sub));
-  }
+		pub_sub_[model_name] = pub_sub_item;
+		//CSScenario::Instance().AddModelPublishSubscribe(model_uuid, std::move(pub_sub));
+	}
 }
 
 TopicDefineInfo  CSScenarioXML::GetTopicDefineInfo(const std::string &topic_name)const {

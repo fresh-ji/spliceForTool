@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MilitaryScenario>
+  <ScenarioInfo>
+    <Name>测试项目</Name>
+    <Id>ZtOE0Jfu</Id>
+    <Node>insA</Node>
+  </ScenarioInfo>
+  <TypeDefine>
+    <!-- 用户数据类型 -->
+    <Type name="UDPosition">
+      <Parameter name="longitude" type="double" />
+      <Parameter name="latitude" type="double" />
+      <Parameter name="altitude" type="double" />
+      <Parameter name="x" type="double" />
+      <Parameter name="y" type="double" />
+      <Parameter name="z" type="double" />
+    </Type>
+    <Type name="UDPosture">
+      <Parameter name="vx" type="int32_t" />
+      <Parameter name="vy" type="int32_t" />
+      <Parameter name="vz" type="int32_t" />
+      <Parameter name="phi" type="int32_t" />
+      <Parameter name="psi" type="int32_t" />
+      <Parameter name="gamma" type="int32_t" />
+    </Type>
+  </TypeDefine>
+  <Topics>
+    <!-- 预留主题 -->
+    <Topic name="acquire_ready_state" />
+    <Topic name="node_ready" />
+    <Topic name="initial_federate" />
+    <Topic name="advance_request" />
+    <Topic name="advance_grant" />
+    <Topic name="simulation_run" />
+    <Topic name="simulation_end" />
+    <!-- 用户主题 -->
+    <Topic name="topic_001" type="double" />
+    <Topic name="topic_002" type="UDPosition" />
+    <Topic name="topic_003" type="UDPosture" />
+  </Topics>
+  <Models>
+    <Model name = "SIMUengine777">
+      <Publish>
+        <!-- 预留发布 -->
+        <Topic topicName="acquire_ready_state" />
+        <Topic topicName="initial_federate" />
+        <Topic topicName="advance_grant" />
+        <Topic topicName="simulation_run" />
+        <Topic topicName="simulation_end" />
+        <!-- 用户发布 -->
+      </Publish>
+      <Subscribe>
+        <!-- 预留订阅 -->
+        <Topic topicName="node_ready" />
+        <Topic topicName="advance_request" />
+        <!-- 用户订阅 -->
+        <Topic topicName="topic_001" />
+        <Topic topicName="topic_002" />
+        <Topic topicName="topic_003" />
+      </Subscribe>
+    </Model>
+    <Model name = "insA">
+      <Publish>
+        <!-- 预留发布 -->
+        <Topic topicName="node_ready" />
+        <Topic topicName="advance_request" />
+        <!-- 用户发布 -->
+        <Topic topicName="topic_001" />
+      </Publish>
+      <Subscribe>
+        <!-- 预留订阅 -->
+        <Topic topicName="acquire_ready_state" />
+        <Topic topicName="initial_federate" />
+        <Topic topicName="advance_grant" />
+        <Topic topicName="simulation_run" />
+        <Topic topicName="simulation_end" />
+        <!-- 用户订阅 -->
+        <Topic topicName="topic_002" />
+        <Topic topicName="topic_003" />
+      </Subscribe>
+    </Model>
+    <Model name="insB">
+      <Publish>
+        <!-- 预留发布 -->
+        <Topic topicName="node_ready" />
+        <Topic topicName="advance_request" />
+        <!-- 用户发布 -->
+        <Topic topicName="topic_002" />
+      </Publish>
+      <Subscribe>
+        <!-- 预留订阅 -->
+        <Topic topicName="acquire_ready_state" />
+        <Topic topicName="initial_federate" />
+        <Topic topicName="advance_grant" />
+        <Topic topicName="simulation_run" />
+        <Topic topicName="simulation_end" />
+        <!-- 用户订阅 -->
+        <Topic topicName="topic_003" />
+      </Subscribe>
+    </Model>
+    <Model name="insC">
+      <Publish>
+        <!-- 预留发布 -->
+        <Topic topicName="node_ready" />
+        <Topic topicName="advance_request" />
+        <!-- 用户发布 -->
+        <Topic topicName="topic_003" />
+      </Publish>
+      <Subscribe>
+        <!-- 预留订阅 -->
+        <Topic topicName="acquire_ready_state" />
+        <Topic topicName="initial_federate" />
+        <Topic topicName="advance_grant" />
+        <Topic topicName="simulation_run" />
+        <Topic topicName="simulation_end" />
+        <!-- 用户订阅 -->
+        <Topic topicName="topic_002" />
+        <Topic topicName="topic_001" />
+      </Subscribe>
+    </Model>
+  </Models>
+</MilitaryScenario>

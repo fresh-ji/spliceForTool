@@ -7,10 +7,9 @@
 #include <random>
 
 #include "WaitSetData_DCPS.hpp"
-#include "ini.hpp"
 
 #include "csscenario_xml.h"
-#include "json.hpp"
+#include "json/json.hpp"
 
 using json = nlohmann::json;
 
@@ -47,9 +46,9 @@ public:
 	}
 
 	// real interfaces
-	bool start(initTool p_initTool, setToTool p_setToTool,
+	bool start(string configName,
+		initTool p_initTool, setToTool p_setToTool,
 		setFinish p_setFinish, endTool p_endTool);
-	bool setValue(string name, string data);
 	bool setValue(string name, void* data);
 	bool advance();
 	bool end();
@@ -68,7 +67,7 @@ private:
 	//转换结构体数据至json
 	string ConvertTypeData2Json(string name, void* data);
 
-	//转换结构体数据至json
+	//转换json至结构体数据
 	char* ConvertJson2TypeData(string name, string data);
 
 	// time management

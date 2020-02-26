@@ -27,6 +27,15 @@
     <ClInclude Include="spliceForTool.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="csscenario_xml.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Interface.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="xml_define.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -36,6 +45,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="dllmain.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="csscenario_xml.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Interface.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
