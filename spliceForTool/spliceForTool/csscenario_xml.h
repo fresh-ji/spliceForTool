@@ -29,10 +29,10 @@ public:
 	CSScenarioXML(const CSScenarioXML& other) = delete;
 	CSScenarioXML& operator=(const CSScenarioXML& other) = delete;
 
-	static CSScenarioXML& getInstance() {
+	/*static CSScenarioXML& getInstance() {
 		static CSScenarioXML instance;
 		return instance;
-	}
+	}*/
 
 	bool ReadXML(const std::string& scenario_full_name);
 

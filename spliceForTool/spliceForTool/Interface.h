@@ -9,9 +9,13 @@
 #include "WaitSetData_DCPS.hpp"
 
 #include "csscenario_xml.h"
+#include "rapidjson/document.h"
+#include "rapidjson/writer.h"
+#include "rapidjson/stringbuffer.h"
 #include "json/json.hpp"
 
 using json = nlohmann::json;
+using namespace rapidjson;
 
 typedef void(*initTool)(double, double);
 typedef void(*setToTool)(double, char*, void*);
@@ -94,6 +98,8 @@ private:
 	setToTool p_setToTool;
 	setFinish p_setFinish;
 	endTool p_endTool;
+
+	CSScenarioXML xml_parser_;
 };
 
 #endif
