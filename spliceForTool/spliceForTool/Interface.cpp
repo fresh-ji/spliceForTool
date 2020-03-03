@@ -17,7 +17,7 @@ public:
 		/** retrieve the associated reader from the condition */
 		dds::sub::DataReader<Msg> dr = cond.data_reader();
 
-		dds::sub::LoanedSamples<Msg> samples = dr.select().state(dataState).take();
+		dds::sub::LoanedSamples<Msg> samples = dr.select().state(dataState).read();
 		// dds::sub::LoanedSamples<Msg> samples = dr.select().content(cond).take();
 		// dds::sub::LoanedSamples<Msg> samples = dr.take();
 
@@ -60,15 +60,15 @@ bool Interface::start(string configName,
 
 	try {
 		// 1.Read Config
-		if (!CSScenarioXML::getInstance().ReadXML(configName)) {
+		if (!xml_parser_.ReadXML(configName)) {
 			cout << "[error] system config fail" << endl;
 			return false;
 		}
 
-		systemId = CSScenarioXML::getInstance().GetSystemId();
-		nodeName = CSScenarioXML::getInstance().GetNodeName();
+		systemId = xml_parser_.GetSystemId();
+		nodeName = xml_parser_.GetNodeName();
 
-		PubSubItem pub_sub = CSScenarioXML::getInstance().GetPubSub(nodeName);
+		PubSubItem pub_sub = xml_parser_.GetPubSub(nodeName);
 		pubNames = pub_sub.publish;
 		subNames = pub_sub.subscribe;
 
@@ -95,7 +95,8 @@ bool Interface::start(string configName,
 
 		// TODO ´¦Àí
 		Sleep(1000);
-		return publish(NODE_READY, "me");
+		return true;
+		//return publish(NODE_READY, "me");
 	}
 	catch (runtime_error& e) {
 		cout << "[error] <" << systemId << "> "
@@ -127,6 +128,8 @@ bool Interface::advance() {
 			<< to_string(currentTime) << endl;
 		return false;
 	}
+	cout << "<" << systemId << "> advance sent successed at "
+		<< to_string(currentTime) << endl;
 	return true;
 }
 
@@ -147,6 +150,7 @@ bool Interface::process(Msg messageIn) {
 		+ "> AT <" + str_time + ">";
 	cout << str << endl;
 
+	currentTime = messageIn.time();
 	string sName = messageIn.systemId();
 	if (sName != systemId) {
 		cout << "[error] <" << systemId << "> "
@@ -155,20 +159,20 @@ bool Interface::process(Msg messageIn) {
 	}
 
 	// prevent history data
-	if ((currentTime - messageIn.time()) > 10e-5) {
+	/*if ((currentTime - messageIn.time()) > 10e-5) {
 		str = "Old Data {";
 		str = str + str_time + "} at {"
 			+ to_string(currentTime) + "}";
 		cout << "[error] <" << systemId << "> "
 			<< str << endl;
 		return false;
-	}
+	}*/
 
 	if (tName == ACQUIRE_READY_STATE) {
 		publish(NODE_READY, "me");
 	}
 	else if (tName == INITIAL_FEDERATE) {
-		currentTime = messageIn.time();
+		//currentTime = messageIn.time();
 
 		stringstream ss;
 		ss << messageIn.content();
@@ -200,7 +204,7 @@ bool Interface::process(Msg messageIn) {
 			delete[] cstr2;
 			iter++;
 		}
-		currentTime = messageIn.time();
+		//currentTime = messageIn.time();
 		(*p_setFinish)(currentTime);
 	}
 	else if (tName == SIMULATION_END) {
@@ -286,46 +290,191 @@ bool Interface::publish(string topic, string data) {
 	return true;
 }
 
+//string Interface::ConvertTypeData2Json(string topic_name, void* data_ptr) {
+//
+//	TopicDefineInfo topic_define_info = CSScenarioXML::getInstance().GetTopicDefineInfo(topic_name);
+//	std::unordered_map<std::string, std::string> params = topic_define_info.params;
+//
+//	json json_data, json_struct;
+//
+//	for (auto p : params) {
+//		std::string param_name = p.first;
+//		std::string param_type = p.second;
+//		if (param_type == "int32_t") {
+//			int data = *(int*)data_ptr;
+//			json_data[param_name] = data;
+//		}
+//		else if (param_type == "double") {
+//			double data = *(double*)data_ptr;
+//			json_data[param_name] = data;
+//		}
+//		else if (param_type == "string") {
+//			std::string data = (char*)data_ptr;
+//			json_data[param_name] = data;
+//		}
+//		else {
+//			TypeDefineInfo type_define_info = CSScenarioXML::getInstance().GetTypeDefineInfo(param_type);
+//			std::unordered_map<std::string, std::string> type_params = type_define_info.params;
+//			//void* tmp = data_ptr;
+//			int index = 0;
+//			for (auto param : type_params) {
+//				std::string struct_param_name = param.first;
+//				std::string struct_param_type = param.second;
+//				if (struct_param_type == "int32_t") {
+//					int data = *((int*)((char*)data_ptr + index));
+//					index = index + 8;
+//
+//					json_struct[struct_param_name] = data;
+//				}
+//				else if (struct_param_type == "double") {
+//					double data = *((double*)((char*)data_ptr + index));
+//					index = index + 8;
+//					json_struct[struct_param_name] = data;
+//				}
+//				else if (struct_param_type == "string") {
+//					char buffer[1024];
+//					memset(buffer, 0, sizeof(buffer));
+//					int len = strlen((char*)((char*)data_ptr + index));
+//					memcpy(buffer, (char*)data_ptr + index, len);
+//					std::string data = buffer;
+//					index = index + len + 1;
+//					json_struct[struct_param_name] = data;
+//				}
+//			}
+//
+//			json_data[param_name] = json_struct;
+//		}
+//	}
+//
+//	std::string str_data = json_data.dump();
+//	return str_data;
+//}
+//
+//char* Interface::ConvertJson2TypeData(string topic_name, string data) {
+//
+//	TopicDefineInfo topic_define_info = CSScenarioXML::getInstance().GetTopicDefineInfo(topic_name);
+//	std::unordered_map<std::string, std::string> params = topic_define_info.params;
+//
+//	if (params.size() <= 0) {
+//		return "";
+//	}
+//
+//	char *buffer = (char*)malloc(sizeof(char) * 1024);
+//	memset(buffer, 0, sizeof(buffer));
+//	int index = 0;
+//	json json_data = json::parse(data);
+//
+//	for (auto p : params) {
+//		std::string param_name = p.first;
+//		std::string param_type = p.second;
+//		if (param_type == "int32_t") {
+//			int data = json_data[param_name];
+//			memcpy(buffer + index, (char*)&data, sizeof(int32_t));
+//			index = index + sizeof(int32_t);
+//		}
+//		else if (param_type == "double") {
+//			double data = json_data[param_name];
+//			memcpy(buffer + index, (char*)&data, sizeof(double));
+//			index = index + sizeof(double);
+//		}
+//		else if (param_type == "string") {
+//			std::string data = json_data[param_name];
+//			int len = data.length();
+//			char *tmp = new char[len + 1];
+//			strcpy(tmp, data.c_str());
+//
+//			memcpy(buffer + index, (char*)&data, len + 1);
+//			index = index + len + 1;
+//		}
+//		else {
+//			TypeDefineInfo type_define_info = CSScenarioXML::getInstance().GetTypeDefineInfo(param_type);
+//			std::unordered_map<std::string, std::string> type_params = type_define_info.params;
+//
+//			json json_struct = json_data[param_name];
+//
+//			for (auto param : type_params) {
+//				std::string struct_param_name = param.first;
+//				std::string struct_param_type = param.second;
+//				if (struct_param_type == "int32_t") {
+//					int data = json_struct[struct_param_name];
+//					memcpy(buffer + index, (char*)&data, sizeof(int32_t));
+//					index = index + sizeof(int32_t);
+//				}
+//				else if (struct_param_type == "double") {
+//					double data = json_struct[struct_param_name];
+//					memcpy(buffer + index, (char*)&data, sizeof(double));
+//					index = index + sizeof(double);
+//				}
+//				else if (struct_param_type == "string") {
+//					std::string data = json_struct[struct_param_name];
+//					int len = data.length();
+//					char *tmp = new char[len + 1];
+//					strcpy(tmp, data.c_str());
+//
+//					memcpy(buffer + index, (char*)&data, len + 1);
+//					index = index + len + 1;
+//				}
+//			}
+//		}
+//	}
+//
+//	return buffer;
+//}
+
 string Interface::ConvertTypeData2Json(string topic_name, void* data_ptr) {
 
-	TopicDefineInfo topic_define_info = CSScenarioXML::getInstance().GetTopicDefineInfo(topic_name);
+	TopicDefineInfo topic_define_info = xml_parser_.GetTopicDefineInfo(topic_name);
 	std::unordered_map<std::string, std::string> params = topic_define_info.params;
 
-	json json_data, json_struct;
+	rapidjson::StringBuffer buf;
+	rapidjson::Writer<rapidjson::StringBuffer> writer(buf);
+	writer.StartObject();
+	//json json_data, json_struct;
+
+	if (data_ptr == NULL)
+	{
+		return  "null";
+	}
 
 	for (auto p : params) {
 		std::string param_name = p.first;
 		std::string param_type = p.second;
 		if (param_type == "int32_t") {
 			int data = *(int*)data_ptr;
-			json_data[param_name] = data;
+			writer.Key(param_name.c_str()); writer.Int(data);
+			//json_data[param_name] = data;
 		}
 		else if (param_type == "double") {
 			double data = *(double*)data_ptr;
-			json_data[param_name] = data;
+			writer.Key(param_name.c_str()); writer.Double(data);
+			//json_data[param_name] = data;
 		}
 		else if (param_type == "string") {
 			std::string data = (char*)data_ptr;
-			json_data[param_name] = data;
+			writer.Key(param_name.c_str()); writer.String(data.c_str());
+			//json_data[param_name] = data;
 		}
 		else {
-			TypeDefineInfo type_define_info = CSScenarioXML::getInstance().GetTypeDefineInfo(param_type);
+			TypeDefineInfo type_define_info = xml_parser_.GetTypeDefineInfo(param_type);
 			std::unordered_map<std::string, std::string> type_params = type_define_info.params;
 			//void* tmp = data_ptr;
+			writer.Key(param_name.c_str());
+			writer.StartObject();
 			int index = 0;
 			for (auto param : type_params) {
 				std::string struct_param_name = param.first;
 				std::string struct_param_type = param.second;
 				if (struct_param_type == "int32_t") {
 					int data = *((int*)((char*)data_ptr + index));
-					index = index + 8;
-
-					json_struct[struct_param_name] = data;
+					index = index + sizeof(int32_t);
+					writer.Key(struct_param_name.c_str()); writer.Int(data);
+					//json_struct[struct_param_name] = data;
 				}
 				else if (struct_param_type == "double") {
 					double data = *((double*)((char*)data_ptr + index));
-					index = index + 8;
-					json_struct[struct_param_name] = data;
+					index = index + sizeof(double);
+					writer.Key(struct_param_name.c_str()); writer.Double(data);
+					//json_struct[struct_param_name] = data;
 				}
 				else if (struct_param_type == "string") {
 					char buffer[1024];
@@ -334,88 +483,119 @@ string Interface::ConvertTypeData2Json(string topic_name, void* data_ptr) {
 					memcpy(buffer, (char*)data_ptr + index, len);
 					std::string data = buffer;
 					index = index + len + 1;
-					json_struct[struct_param_name] = data;
+					writer.Key(param_name.c_str()); writer.String(data.c_str());
+					//json_struct[struct_param_name] = data;
 				}
 			}
-
-			json_data[param_name] = json_struct;
+			writer.EndObject();
+			//json_data[param_name] = json_struct;
 		}
 	}
-
-	std::string str_data = json_data.dump();
+	writer.EndObject();
+	const char* json_content = buf.GetString();
+	fprintf(stdout, "json content: %s\n", json_content);
+	std::string str_data = json_content;
 	return str_data;
+
+	//std::string str_data = json_data.dump();
+	//return str_data;
 }
 
 char* Interface::ConvertJson2TypeData(string topic_name, string data) {
 
-	TopicDefineInfo topic_define_info = CSScenarioXML::getInstance().GetTopicDefineInfo(topic_name);
+	TopicDefineInfo topic_define_info = xml_parser_.GetTopicDefineInfo(topic_name);
 	std::unordered_map<std::string, std::string> params = topic_define_info.params;
-
-	if (params.size() <= 0) {
-		return "";
-	}
 
 	char *buffer = (char*)malloc(sizeof(char) * 1024);
 	memset(buffer, 0, sizeof(buffer));
 	int index = 0;
-	json json_data = json::parse(data);
 
-	for (auto p : params) {
-		std::string param_name = p.first;
-		std::string param_type = p.second;
-		if (param_type == "int32_t") {
-			int data = json_data[param_name];
-			memcpy(buffer + index, (char*)&data, sizeof(int32_t));
-			index = index + sizeof(int32_t);
-		}
-		else if (param_type == "double") {
-			double data = json_data[param_name];
-			memcpy(buffer + index, (char*)&data, sizeof(double));
-			index = index + sizeof(double);
-		}
-		else if (param_type == "string") {
-			std::string data = json_data[param_name];
-			int len = data.length();
-			char *tmp = new char[len + 1];
-			strcpy(tmp, data.c_str());
+	if (params.size() <= 0) {
+		return buffer;
+	}
 
-			memcpy(buffer + index, (char*)&data, len + 1);
-			index = index + len + 1;
-		}
-		else {
-			TypeDefineInfo type_define_info = CSScenarioXML::getInstance().GetTypeDefineInfo(param_type);
-			std::unordered_map<std::string, std::string> type_params = type_define_info.params;
+	//json json_data = json::parse(data);
 
-			json json_struct = json_data[param_name];
-
-			for (auto param : type_params) {
-				std::string struct_param_name = param.first;
-				std::string struct_param_type = param.second;
-				if (struct_param_type == "int32_t") {
-					int data = json_struct[struct_param_name];
+	std::string json_content = data;
+	rapidjson::Document dom;
+	if (!dom.Parse(json_content.c_str()).HasParseError()) {
+		for (auto p : params) {
+			std::string param_name = p.first;
+			std::string param_type = p.second;
+			if (param_type == "int32_t") {
+				if (dom.HasMember(param_name.c_str()) && dom[param_name.c_str()].IsInt()) {
+					int data = dom[param_name.c_str()].GetInt();
 					memcpy(buffer + index, (char*)&data, sizeof(int32_t));
 					index = index + sizeof(int32_t);
-				}
-				else if (struct_param_type == "double") {
-					double data = json_struct[struct_param_name];
+				}	
+			}
+			else if (param_type == "double") {
+				if (dom.HasMember(param_name.c_str()) && dom[param_name.c_str()].IsDouble()) {
+					double data = dom[param_name.c_str()].GetDouble();
 					memcpy(buffer + index, (char*)&data, sizeof(double));
 					index = index + sizeof(double);
 				}
-				else if (struct_param_type == "string") {
-					std::string data = json_struct[struct_param_name];
+			}
+			else if (param_type == "string") {
+				if (dom.HasMember(param_name.c_str()) && dom[param_name.c_str()].IsString()) {
+					std::string data = dom[param_name.c_str()].GetString();
 					int len = data.length();
 					char *tmp = new char[len + 1];
 					strcpy(tmp, data.c_str());
 
-					memcpy(buffer + index, (char*)&data, len + 1);
+					memcpy(buffer + index, (char*)tmp, len + 1);
 					index = index + len + 1;
+				}
+			}
+			else {
+				TypeDefineInfo type_define_info = xml_parser_.GetTypeDefineInfo(param_type);
+				std::unordered_map<std::string, std::string> type_params = type_define_info.params;
+				rapidjson::Value struct_obj;
+
+				if (dom.HasMember(param_name.c_str()) && dom[param_name.c_str()].IsObject()) {
+					struct_obj = dom[param_name.c_str()];
+				}
+
+				for (auto param : type_params) {
+					std::string struct_param_name = param.first;
+					std::string struct_param_type = param.second;
+					if (struct_param_type == "int32_t") {
+						if (struct_obj.HasMember(struct_param_name.c_str()) && struct_obj[struct_param_name.c_str()].IsInt()) {
+							int data = struct_obj[struct_param_name.c_str()].GetInt();
+							memcpy(buffer + index, (char*)&data, sizeof(int32_t));
+							index = index + sizeof(int32_t);
+						}
+					}
+					else if (struct_param_type == "double") {
+						if (struct_obj.HasMember(struct_param_name.c_str()) && struct_obj[struct_param_name.c_str()].IsDouble()) {
+							double data = struct_obj[struct_param_name.c_str()].GetDouble();
+							memcpy(buffer + index, (char*)&data, sizeof(double));
+							index = index + sizeof(double);
+						}
+					}
+					else if (struct_param_type == "string") {
+						if (struct_obj.HasMember(struct_param_name.c_str()) && struct_obj[struct_param_name.c_str()].IsString()) {
+							std::string data = struct_obj[struct_param_name.c_str()].GetString();
+							int len = data.length();
+							char *tmp = new char[len + 1];
+							strcpy(tmp, data.c_str());
+
+							memcpy(buffer + index, (char*)tmp, len + 1);
+							index = index + len + 1;
+						}
+					}
 				}
 			}
 		}
 	}
+	else {
+		cout << "fail to parse json:" << json_content << endl;
+		//return -1;
+	}
 
 	return buffer;
 }
+
 
 /*
 bool Interface::parseConfig() {
