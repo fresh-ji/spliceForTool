@@ -1,4 +1,4 @@
-﻿
+
 #include <tchar.h>
 #include <Windows.h>
 #include <stdio.h>
@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
 	advanceFun = (FunDLL3)GetProcAddress(hInstC, "dllAdvance");
 	endFun = (FunDLL4)GetProcAddress(hInstC, "dllEnd");
 
-	startFun("ZtOE0Jfu_insB.xml",
+	startFun("ZtOE0Jfu_insC.xml",
 		initTool, setToTool, setFinish, endTool);
 
 	while (1) {

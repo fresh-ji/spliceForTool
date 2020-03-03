@@ -12,9 +12,7 @@
 #include "rapidjson/document.h"
 #include "rapidjson/writer.h"
 #include "rapidjson/stringbuffer.h"
-#include "json/json.hpp"
 
-using json = nlohmann::json;
 using namespace rapidjson;
 
 typedef void(*initTool)(double, double);
@@ -99,6 +97,7 @@ private:
 	setFinish p_setFinish;
 	endTool p_endTool;
 
+	// ÅäÖÃÎÄ¼ş½âÎö
 	CSScenarioXML xml_parser_;
 };
 
