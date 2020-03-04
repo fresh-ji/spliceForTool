@@ -127,9 +127,6 @@ bool Interface::advance() {
 			<< to_string(currentTime) << endl;
 		return false;
 	}
-	cout << "<" << systemId << "> advance send successed at "
-		<< to_string(currentTime) << endl;
-
 	return true;
 }
 
