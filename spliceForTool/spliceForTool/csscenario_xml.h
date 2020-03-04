@@ -41,6 +41,7 @@ public:
 	PubSubItem GetPubSub(const std::string &type_name)const;
 	std::string GetSystemId();
 	std::string GetNodeName();
+	std::vector<std::string> GetAllNode();
 protected:
 	//读取xml
 	void ParserScenarioInfo(xml_node<char>*& parent_node);
@@ -65,8 +66,7 @@ private:
 	std::unordered_map<std::string, TopicDefineInfo> topic_define_s_;
 
 	std::map<std::string, PubSubItem> pub_sub_;
-
-	bool already_read_publish_subscribe_xml_ = false;
+	std::vector<std::string> all_node_;
 };
 
 #endif
