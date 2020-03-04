@@ -3,7 +3,7 @@
 #include "csscenario_xml.h"
 
 CSScenarioXML::CSScenarioXML(const std::string& xml_path) :file_path_(xml_path) {
-	already_read_publish_subscribe_xml_ = false;
+	//already_read_publish_subscribe_xml_ = false;
 }
 
 bool CSScenarioXML::ReadXML(const std::string& scenario_full_name) {
@@ -285,6 +285,7 @@ void CSScenarioXML::ParserPublishSubscribe(xml_node<char>*& parent_node) {
 		}
 
 		pub_sub_[model_name] = pub_sub_item;
+		all_node_.push_back(model_name);
 		//CSScenario::Instance().AddModelPublishSubscribe(model_uuid, std::move(pub_sub));
 	}
 }
@@ -328,4 +329,8 @@ std::string CSScenarioXML::GetSystemId(){
 
 std::string CSScenarioXML::GetNodeName(){
 	return node_;
+}
+
+std::vector<std::string> CSScenarioXML::GetAllNode() {
+	return all_node_;
 }

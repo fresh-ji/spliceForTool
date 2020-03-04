@@ -127,6 +127,9 @@ bool Interface::advance() {
 			<< to_string(currentTime) << endl;
 		return false;
 	}
+	cout << "<" << systemId << "> advance send successed at "
+		<< to_string(currentTime) << endl;
+
 	return true;
 }
 
@@ -206,6 +209,9 @@ bool Interface::process(Msg messageIn) {
 	else if (tName == SIMULATION_END) {
 		// TODO 删资源，目前都是引擎结束这一切
 		(*p_endTool)();
+	}
+	else if (tName == SIMULATION_RUN) {
+		//advance();
 	}
 	else {
 		// actual data
