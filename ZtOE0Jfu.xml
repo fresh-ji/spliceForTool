@@ -54,9 +54,7 @@
         <Topic topicName="node_ready" />
         <Topic topicName="advance_request" />
         <!-- 用户订阅 -->
-        <Topic topicName="topic_001" />
-        <Topic topicName="topic_002" />
-        <Topic topicName="topic_003" />
+        <Topic topicName="simulation_run" />
       </Subscribe>
     </Model>
     <Model name = "insA">
