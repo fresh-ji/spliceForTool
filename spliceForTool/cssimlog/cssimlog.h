@@ -36,13 +36,6 @@ CSSimLog::Instance()->Write(category, level, msg);
 #define LogSEErr(msg) Log("scenario", 4, msg)
 #define LogSECri(msg) Log("scenario", 5, msg)
 
-#define Log2DTrace(msg) Log("2dview", 0, msg)
-#define Log2DDebug(msg) Log("2dview", 1, msg)
-#define Log2DInfo(msg)  Log("2dview", 2, msg)
-#define Log2DWarn(msg) Log("2dview", 3, msg)
-#define Log2DErr(msg) Log("2dview", 4, msg)
-#define Log2DCri(msg) Log("2dview", 5, msg)
-
 #define LogDDSTrace(msg) Log("dds", 0, msg)
 #define LogDDSDebug(msg) Log("dds", 1, msg)
 #define LogDDSInfo(msg)  Log("dds", 2, msg)
@@ -56,20 +49,6 @@ CSSimLog::Instance()->Write(category, level, msg);
 #define LogEngWarn(msg) Log("engine", 3, msg)
 #define LogEngErr(msg) Log("engine", 4, msg)
 #define LogEngCri(msg) Log("engine", 5, msg)
-
-#define LogDBTrace(msg) Log("database", 0, msg)
-#define LogDBDebug(msg) Log("database", 1, msg)
-#define LogDBInfo(msg)  Log("database", 2, msg)
-#define LogDBWarn(msg) Log("database", 3, msg)
-#define LogDBErr(msg) Log("database", 4, msg)
-#define LogDBCri(msg) Log("database", 5, msg)
-
-#define LogGisTrace(msg) Log("gis", 0, msg)
-#define LogGisDebug(msg) Log("gis", 1, msg)
-#define LogGisInfo(msg)  Log("gis", 2, msg)
-#define LogGisWarn(msg) Log("gis", 3, msg)
-#define LogGisErr(msg) Log("gis", 4, msg)
-#define LogGisCri(msg) Log("gis", 5, msg)
 
 class CSSIMLOG_API CSSimLog : public CSILog {
  public:
