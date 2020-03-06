@@ -3,6 +3,9 @@
 #include "Interface.h"
 #include <stdlib.h>
 #include <malloc.h>
+#include <iostream>
+#include <fstream>
+#include <cassert>
 
 class ReadCondHandler {
 public:
@@ -35,6 +38,10 @@ private:
 bool wsServe(dds::core::cond::WaitSet waitSet, string systemId) {
 	cout << "[checked] <" << systemId << "> "
 		<< "dds detached thread starts well" << endl;
+	std::string msg;
+	msg = systemId + "dds detached thread starts well";
+	LogDDSInfo(msg);
+
 	while (1) {
 		try {
 			waitSet.dispatch();
@@ -42,16 +49,26 @@ bool wsServe(dds::core::cond::WaitSet waitSet, string systemId) {
 		catch (const dds::core::TimeoutError e) {
 			cout << "[error] <" << systemId << "> "
 				"dds thread:" << e.what() << endl;
+			std::string msg;
+			msg = systemId + "dds thread:" + e.what();
+			LogDDSErr(msg);
 			return false;
 		}
 	}
+
 	cout << "[checked] <" << systemId << "> "
 		<< "dds detached thread ends" << endl;
+	msg = systemId + "dds detached thread ends";
+	LogDDSInfo(msg);
 	return true;
 }
 
 Interface::Interface() {
 	systemRunId = org::opensplice::domain::default_id();
+
+	std::string pt("initialize_log.txt");
+	CSSimLog::Instance()->CreateLog(pt);
+	LogDDSInfo("init log success");
 }
 
 bool Interface::start(string configName,
@@ -62,6 +79,8 @@ bool Interface::start(string configName,
 		// 1.Read Config
 		if (!xml_parser_.ReadXML(configName)) {
 			cout << "[error] system config fail" << endl;
+
+			LogDDSErr("parse xml file fail");
 			return false;
 		}
 
@@ -72,6 +91,36 @@ bool Interface::start(string configName,
 		pubNames = pub_sub.publish;
 		subNames = pub_sub.subscribe;
 
+		//log
+		ifstream infile;
+		infile.open("initialize_log.txt");
+		if (!infile.is_open())
+		{
+			LogDDSErr("open initialize log file fail");
+		}
+
+		std::string csscenario_full_logname = nodeName + ".txt";
+		ofstream outfile;
+		outfile.open(csscenario_full_logname);
+		if (!outfile.is_open())
+		{
+			std::string msg = "open" + csscenario_full_logname + "fail";
+			LogDDSErr(msg);
+		}
+
+		CSSimLog::Instance()->CloseLog();
+
+		std::string line;
+		while (getline(infile, line)) {
+			outfile << line << endl;
+		}
+		infile.close();
+		outfile.close();
+		CSSimLog::Instance()->CreateLog(csscenario_full_logname);
+		if (std::remove("initialize_log.txt") == -1) {
+			LogDDSInfo("delete initialize log fail");
+		}
+
 		// 2.Parameters
 		currentTime = 0.0;
 		this->p_initTool = p_initTool;
@@ -81,10 +130,16 @@ bool Interface::start(string configName,
 		cout << "[checked] <" << systemId << "> "
 			<< "got callback parameters" << endl;
 
+		std::string msg;
+		msg = "checked" + systemId + "got callback parameters";
+		LogDDSInfo(msg);
+
 		// 3.DDS
 		if (!startServerDDS()) {
 			cout << "[error] <" << systemId << "> "
 				<< "start dds fail" << endl;
+			msg = systemId + "start dds fail";
+			LogDDSErr(msg);
 			return false;
 		}
 
@@ -92,7 +147,9 @@ bool Interface::start(string configName,
 		th.detach();
 
 		cout << "-----CONGRATULATIONS, ALMOST DONE!-----" << endl;
-
+		
+		msg = systemId + "-----CONGRATULATIONS, ALMOST DONE!-----";
+		LogDDSInfo(msg);
 		// TODO ´¦Àí
 		Sleep(1000);
 		return publish(NODE_READY, "me");
@@ -100,11 +157,19 @@ bool Interface::start(string configName,
 	catch (runtime_error& e) {
 		cout << "[error] <" << systemId << "> "
 			<< "runtime:" << e.what() << endl;
+
+		std::string msg;
+		msg = systemId + "runtime:" + e.what();
+		LogDDSErr(msg);
 		return false;
 	}
 	catch (exception &e) {
 		cout << "[exception] <" << systemId << "> "
 			<< e.what() << endl;
+
+		std::string msg;
+		msg = systemId + "exception:" + e.what();
+		LogDDSErr(msg);
 		return false;
 	}
 }
@@ -113,23 +178,35 @@ bool Interface::setValue(string topic_name, void* data_ptr) {
 	string data = ConvertTypeData2Json(topic_name, data_ptr);
 	if (!publish(topic_name.c_str(), data)) {
 		cout << "[error] <" << systemId << "> "
-			<< "data sent fail at "
+			<< "data send fail at "
 			<< to_string(currentTime) << endl;
+
+		std::string msg;
+		msg = systemId + "data send fail at" + to_string(currentTime);
+		LogDDSErr(msg);
 		return false;
 	}
 	return true;
 }
 
 bool Interface::advance() {
+	
 	if (!publish(ADVANCE_REQUEST, to_string(currentTime))) {
 		cout << "[error] <" << systemId << "> "
-			<< "advance sent fail at "
+			<< "advance send fail at "
 			<< to_string(currentTime) << endl;
+
+		std::string msg;
+		msg = systemId + "advance send fail at" + to_string(currentTime);
+		LogDDSErr(msg);
 		return false;
 	}
+
 	cout << "<" << systemId << "> advance send successed at "
 		<< to_string(currentTime) << endl;
-
+	std::string msg;
+	msg = systemId + "advance send successed at" + to_string(currentTime);
+	LogDDSInfo(msg);
 	return true;
 }
 
@@ -149,11 +226,16 @@ bool Interface::process(Msg messageIn) {
 	str = str + tName + "> FROM <" + messageIn.from()
 		+ "> AT <" + str_time + ">";
 	cout << str << endl;
+	LogDDSInfo(str);
 
 	string sName = messageIn.systemId();
 	if (sName != systemId) {
 		cout << "[error] <" << systemId << "> "
 			<< "the message is not for me" << endl;
+
+		std::string msg;
+		msg = systemId + "the message is not for me";
+		LogDDSInfo(msg);
 		return false;
 	}
 
@@ -164,6 +246,10 @@ bool Interface::process(Msg messageIn) {
 			+ to_string(currentTime) + "}";
 		cout << "[error] <" << systemId << "> "
 			<< str << endl;
+
+		std::string msg;
+		msg = systemId + str;
+		LogDDSInfo(msg);
 		return false;
 	}
 
@@ -356,7 +442,11 @@ string Interface::ConvertTypeData2Json(string topic_name, void* data_ptr) {
 	writer.EndObject();
 	const char* json_content = buf.GetString();
 	fprintf(stdout, "json content: %s\n", json_content);
+
 	std::string str_data = json_content;
+
+	std::string msg = "json content :" + str_data;
+	LogDDSInfo(msg);
 	return str_data;
 }
 
@@ -447,6 +537,10 @@ char* Interface::ConvertJson2TypeData(string topic_name, string data) {
 	}
 	else {
 		cout << "fail to parse json:" << json_content << endl;
+
+		std::string msg;
+		msg = "fail to parse json:" + json_content;
+		LogDDSErr(msg);
 	}
 	return buffer;
 }

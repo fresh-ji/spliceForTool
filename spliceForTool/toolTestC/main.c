@@ -144,12 +144,12 @@ int main(int argc, char *argv[]) {
 	}*/
 
 	
-	posture.vx = 100;
-	posture.vy = 100;
-	posture.vz = 100;
-	posture.psi = 100;
-	posture.phi = 100;
-	posture.gamma= 100;
+	posture.vx = 0;
+	posture.vy = 0;
+	posture.vz = 0;
+	posture.psi = 0;
+	posture.phi = 0;
+	posture.gamma= 0;
 	/*char topic_name[10] = "topic_003";
 	char topic_name2[20] = "advance_grant";
 	int time = 1;

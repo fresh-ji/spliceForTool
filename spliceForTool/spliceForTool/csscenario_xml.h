@@ -7,10 +7,9 @@
 #include <unordered_map>
 #include <fstream>
 
-//#include "csscenario_xml_export.h"
 #include "xml_define.h"
-//#include "cssimlog/cssimlog.h"
-//#include "csentity/csentity.h"
+#include "cssimlog.h"
+#include "cssimlog_export.h"
 
 #include "rapidxml/rapidxml.hpp"
 #include "rapidxml/rapidxml_print.hpp"
@@ -47,7 +46,6 @@ protected:
 	void ParserScenarioInfo(xml_node<char>*& parent_node);
 	void ParserTypeDefine(xml_node<char>*& parent_ndoe);
 	void ParserTopicDefine(xml_node<char>*& parent_ndoe);
-	void ParserTopics(xml_node<char>*& parent_ndoe);
 	void ParserPublishSubscribe(xml_node<char>*& parent_ndoe);
 private:
 	std::string file_path_;

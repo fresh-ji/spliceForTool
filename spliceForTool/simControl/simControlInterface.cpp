@@ -4,6 +4,9 @@
 #include <stdio.h>
 #include <cstdlib>
 #include <malloc.h>
+#include <iostream>
+#include <fstream>
+#include <cassert>
 
 class ReadCondHandler {
 public:
@@ -36,6 +39,10 @@ private:
 bool wsServe(dds::core::cond::WaitSet waitSet, string systemId) {
 	cout << "[checked] <" << systemId << "> "
 		<< "dds detached thread starts well" << endl;
+	std::string msg;
+	msg = systemId + "dds detached thread starts well";
+	LogDDSInfo(msg);
+
 	while (1) {
 		try {
 			waitSet.dispatch();
@@ -43,16 +50,25 @@ bool wsServe(dds::core::cond::WaitSet waitSet, string systemId) {
 		catch (const dds::core::TimeoutError e) {
 			cout << "[error] <" << systemId << "> "
 				"dds thread:" << e.what() << endl;
+			std::string msg;
+			msg = systemId + "dds thread:" + e.what();
+			LogDDSErr(msg);
 			return false;
 		}
 	}
 	cout << "[checked] <" << systemId << "> "
 		<< "dds detached thread ends" << endl;
+	msg = systemId + "dds detached thread ends";
+	LogDDSInfo(msg);
 	return true;
 }
 
 SimControlInterface::SimControlInterface() {
 	systemRunId = org::opensplice::domain::default_id();
+
+	std::string pt("initialize_log.txt");
+	CSSimLog::Instance()->CreateLog(pt);
+	LogDDSInfo("init log success");
 }
 
 
@@ -62,6 +78,8 @@ bool SimControlInterface::simRun(string configName)
 		// 1.Read Config
 		if (!xml_parser_.ReadXML(configName)) {
 			cout << "[error] system config fail" << endl;
+
+			LogDDSErr("parse xml file fail");
 			return false;
 		}
 
@@ -72,14 +90,35 @@ bool SimControlInterface::simRun(string configName)
 		pubNames = pub_sub.publish;
 		subNames = pub_sub.subscribe;
 
-		// 2.Parameters
-		/*currentTime = 0.0;
-		this->p_initTool = p_initTool;
-		this->p_setToTool = p_setToTool;
-		this->p_setFinish = p_setFinish;
-		this->p_endTool = p_endTool;
-		cout << "[checked] <" << systemId << "> "
-			<< "got callback parameters" << endl;*/
+		//log
+		ifstream infile;
+		infile.open("initialize_log.txt");
+		if (!infile.is_open())
+		{
+			LogDDSErr("open initialize log file fail");
+		}
+
+		std::string csscenario_full_logname = nodeName + ".txt";
+		ofstream outfile;
+		outfile.open(csscenario_full_logname);
+		if (!outfile.is_open())
+		{
+			std::string msg = "open" + csscenario_full_logname + "fail";
+			LogDDSErr(msg);
+		}
+
+		CSSimLog::Instance()->CloseLog();
+
+		std::string line;
+		while (getline(infile, line)) {
+			outfile << line << endl;
+		}
+		infile.close();
+		outfile.close();
+		CSSimLog::Instance()->CreateLog(csscenario_full_logname);
+		if (std::remove("initialize_log.txt") == -1) {
+			LogDDSInfo("delete initialize log fail");
+		}
 
 		//2.node
 		std::vector<std::string>allNodes = xml_parser_.GetAllNode();
@@ -95,6 +134,10 @@ bool SimControlInterface::simRun(string configName)
 		if (!startServerDDS()) {
 			cout << "[error] <" << systemId << "> "
 				<< "start dds fail" << endl;
+
+			std::string msg;
+			msg = systemId + "start dds fail";
+			LogDDSErr(msg);
 			return false;
 		}
 
@@ -102,7 +145,10 @@ bool SimControlInterface::simRun(string configName)
 		th.detach();
 
 		cout << "-----CONGRATULATIONS, ALMOST DONE!-----" << endl;
-
+		
+		std::string msg;
+		msg = systemId + "-----CONGRATULATIONS, ALMOST DONE!-----";
+		LogDDSInfo(msg);
 		// TODO 处理
 		Sleep(1000);
 		start_flag_ = true;
@@ -112,11 +158,19 @@ bool SimControlInterface::simRun(string configName)
 	catch (runtime_error& e) {
 		cout << "[error] <" << systemId << "> "
 			<< "runtime:" << e.what() << endl;
+
+		std::string msg;
+		msg = systemId + "runtime:" + e.what();
+		LogDDSErr(msg);
 		return false;
 	}
 	catch (exception &e) {
 		cout << "[exception] <" << systemId << "> "
 			<< e.what() << endl;
+
+		std::string msg;
+		msg = systemId + "exception:" + e.what();
+		LogDDSErr(msg);
 		return false;
 	}
 }
@@ -124,7 +178,6 @@ bool SimControlInterface::simRun(string configName)
 bool SimControlInterface::simPause()
 {
 	pause_flag_ = true;
-
 	return true;
 }
 
@@ -155,11 +208,16 @@ bool SimControlInterface::process(Msg messageIn) {
 		str = str + tName + "> FROM <" + messageIn.from()
 			+ "> AT <" + str_time + ">";
 		cout << str << endl;
+		LogDDSInfo(str);
 
 		string sName = messageIn.systemId();
 		if (sName != systemId) {
 			cout << "[error] <" << systemId << "> "
 				<< "the message is not for me" << endl;
+
+			std::string msg;
+			msg = systemId + "the message is not for me";
+			LogDDSErr(str);
 			return false;
 		}
 
@@ -170,6 +228,10 @@ bool SimControlInterface::process(Msg messageIn) {
 				+ to_string(currentTime) + "}";
 			cout << "[error] <" << systemId << "> "
 				<< str << endl;
+
+			std::string msg;
+			msg = systemId + str;
+			LogDDSInfo(msg);
 			return false;
 		}
 
@@ -179,9 +241,15 @@ bool SimControlInterface::process(Msg messageIn) {
 			//检测各节点准备状态，发送初始化主题；
 			ready_state_[from] = true;
 			cout << "i have accept <" << from << "> is ready" << endl;
+
+			std::string msg;
+			msg = "i have accept <" + from + "> is ready";
+			LogDDSInfo(msg);
+
 			if (CheckAllNodeReadyState())
 			{
 				cout << "all node is ready,start init" << endl;
+				LogDDSInfo("all node is ready,start init");
 				publish(INITIAL_FEDERATE, "me");
 			}
 		}
@@ -196,6 +264,8 @@ bool SimControlInterface::process(Msg messageIn) {
 				if (first_acquire_flag_)
 				{
 					cout << "all nodes are init,start run" << endl;
+					LogDDSInfo("all nodes are init,start run");
+
 					publish(SIMULATION_RUN, "me");
 					pre_time_ = std::chrono::steady_clock::now();
 					start_time_ = std::chrono::steady_clock::now();
@@ -205,6 +275,7 @@ bool SimControlInterface::process(Msg messageIn) {
 				{
 					//currentTime++;
 					cout << "all nodes are acquire advance" << endl;
+					LogDDSInfo("all nodes are acquire advance");
 					publish(ADVANCE_GRANT, "me");
 				}
 				Sleep(10000);
@@ -371,6 +442,9 @@ string SimControlInterface::ConvertTypeData2Json(string topic_name, void* data_p
 	const char* json_content = buf.GetString();
 	fprintf(stdout, "json content: %s\n", json_content);
 	std::string str_data = json_content;
+
+	std::string msg = "json content :" + str_data;
+	LogDDSInfo(msg);
 	return str_data;
 
 	//std::string str_data = json_data.dump();
@@ -466,7 +540,10 @@ char* SimControlInterface::ConvertJson2TypeData(string topic_name, string data) 
 	}
 	else {
 		cout << "fail to parse json:" << json_content << endl;
-		//return -1;
+
+		std::string msg;
+		msg = "fail to parse json:" + json_content;
+		LogDDSErr(msg);
 	}
 
 	return buffer;
