@@ -150,7 +150,7 @@ bool Interface::start(string configName,
 		
 		msg = systemId + "-----CONGRATULATIONS, ALMOST DONE!-----";
 		LogDDSInfo(msg);
-		// TODO ¥¶¿Ì
+		// TODO Â§ÑÁêÜ
 		Sleep(1000);
 		return publish(NODE_READY, "me");
 	}
@@ -201,7 +201,6 @@ bool Interface::advance() {
 		LogDDSErr(msg);
 		return false;
 	}
-
 	cout << "<" << systemId << "> advance send successed at "
 		<< to_string(currentTime) << endl;
 	std::string msg;
@@ -211,7 +210,7 @@ bool Interface::advance() {
 }
 
 bool Interface::end() {
-	// TODO …æ◊ ‘¥£¨ƒø«∞∂º «“˝«ÊΩ· ¯’‚“ª«–
+	// TODO Âà†ËµÑÊ∫êÔºåÁõÆÂâçÈÉΩÊòØÂºïÊìéÁªìÊùüËøô‰∏ÄÂàá
 	return true;
 
 }
@@ -293,7 +292,7 @@ bool Interface::process(Msg messageIn) {
 		(*p_setFinish)(currentTime);
 	}
 	else if (tName == SIMULATION_END) {
-		// TODO …æ◊ ‘¥£¨ƒø«∞∂º «“˝«ÊΩ· ¯’‚“ª«–
+		// TODO Âà†ËµÑÊ∫êÔºåÁõÆÂâçÈÉΩÊòØÂºïÊìéÁªìÊùüËøô‰∏ÄÂàá
 		(*p_endTool)();
 	}
 	else if (tName == SIMULATION_RUN) {
