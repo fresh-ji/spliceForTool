@@ -13,6 +13,9 @@
 #include "rapidjson/writer.h"
 #include "rapidjson/stringbuffer.h"
 
+#include "cssimlog.h"
+#include "cssimlog_export.h"
+
 using namespace rapidjson;
 
 typedef void(*initTool)(double, double);

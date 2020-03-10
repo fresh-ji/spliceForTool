@@ -7,10 +7,9 @@
 #include <unordered_map>
 #include <fstream>
 
-//#include "csscenario_xml_export.h"
 #include "xml_define.h"
-//#include "cssimlog/cssimlog.h"
-//#include "csentity/csentity.h"
+#include "cssimlog.h"
+#include "cssimlog_export.h"
 
 #include "rapidxml/rapidxml.hpp"
 #include "rapidxml/rapidxml_print.hpp"
@@ -42,10 +41,11 @@ public:
 	PubSubItem GetPubSub(const string &type_name) const;
 
 protected:
+
 	bool ParserScenarioInfo(xml_node<char>*& parent_node);
 	bool ParserTypeDefine(xml_node<char>*& parent_ndoe);
 	bool ParserTopicDefine(xml_node<char>*& parent_ndoe);
-	bool ParserTopics(xml_node<char>*& parent_ndoe);
+
 	bool ParserPublishSubscribe(xml_node<char>*& parent_ndoe);
 
 private:
