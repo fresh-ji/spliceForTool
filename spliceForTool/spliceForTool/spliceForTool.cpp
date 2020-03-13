@@ -2,26 +2,55 @@
 #include "stdafx.h"
 #include "spliceForTool.h"
 
+map<string, Interface*> instanceMap;
+
 // 1
-int dllStart(char* configName,
+char* dllStart(char* configName,
 	initTool p_initTool, setToTool p_setToTool,
 	setFinish p_setFinish, endTool p_endTool) {
-	return (Interface::getInstance().start(configName,
-		p_initTool, p_setToTool,
-		p_setFinish, p_endTool) ? 1 : 0);
+
+	Interface *i = new Interface();
+
+	string ret = i->start(configName,
+		p_initTool, p_setToTool, p_setFinish, p_endTool);
+
+	if ("" != ret) {
+		if (1 == instanceMap.count(ret)) {
+			instanceMap.erase(ret);
+			//TODO log
+		}
+		instanceMap.insert(make_pair(ret, i));
+		//TODO log
+	}
+	else {
+		//TODO log
+	}
+	return const_cast<char*>(ret.c_str());
 }
 
 // 2
-int dllSetValue(char* name, void* data) {
-	return (Interface::getInstance().setValue(name, data) ? 1 : 0);
+int dllSetValue(char* token, char* name, void* data) {
+	if (0 == instanceMap.count(token)) {
+		//TODO log
+		return 0;
+	}
+	return (instanceMap[token]->setValue(name, data) ? 1 : 0);
 }
 
 // 3
-int dllAdvance() {
-	return (Interface::getInstance().advance() ? 1 : 0);
+int dllAdvance(char* token) {
+	if (0 == instanceMap.count(token)) {
+		//TODO log
+		return 0;
+	}
+	return (instanceMap[token]->advance() ? 1 : 0);
 }
 
 // 4
-int dllEnd() {
-	return (Interface::getInstance().end() ? 1 : 0);
+int dllEnd(char* token) {
+	if (0 == instanceMap.count(token)) {
+		//TODO log
+		return 0;
+	}
+	return (instanceMap[token]->end() ? 1 : 0);
 }

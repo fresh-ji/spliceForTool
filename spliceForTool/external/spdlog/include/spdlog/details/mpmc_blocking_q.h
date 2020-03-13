@@ -1,7 +1,9 @@
-// Copyright(c) 2015-present, Gabi Melman & spdlog contributors.
-// Distributed under the MIT License (http://opensource.org/licenses/MIT)
-
 #pragma once
+
+//
+// Copyright(c) 2018 Gabi Melman.
+// Distributed under the MIT License (http://opensource.org/licenses/MIT)
+//
 
 // multi producer-multi consumer blocking queue.
 // enqueue(..) - will block until room found to put the new message.
@@ -25,7 +27,8 @@ public:
     using item_type = T;
     explicit mpmc_blocking_queue(size_t max_items)
         : q_(max_items)
-    {}
+    {
+    }
 
 #ifndef __MINGW32__
     // try to enqueue and block if no room left

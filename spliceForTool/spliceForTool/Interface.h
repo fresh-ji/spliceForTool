@@ -4,17 +4,20 @@
 
 #include <thread>
 #include <iostream>
+#include <fstream>
 #include <random>
+#include <stdlib.h>
+#include <cassert>
 
 #include "WaitSetData_DCPS.hpp"
 
 #include "csscenario_xml.h"
+
 #include "rapidjson/document.h"
 #include "rapidjson/writer.h"
 #include "rapidjson/stringbuffer.h"
 
-#include "cssimlog.h"
-#include "cssimlog_export.h"
+///#include "cssimlog.h"
 
 using namespace rapidjson;
 
@@ -33,25 +36,17 @@ typedef void(*endTool)();
 
 #define ENGINENAME "SIMUengine777"
 
+#define STDOUTTEST
+
 using namespace std;
 using namespace WaitSetData;
 
 class Interface {
 
-private:
-	Interface();
-	~Interface() {}
-	Interface(const Interface&);
-	Interface& operator=(const Interface&);
-
 public:
-	static Interface& getInstance() {
-		static Interface instance;
-		return instance;
-	}
-
+	Interface();
 	// real interfaces
-	bool start(string configName,
+	string start(string configName,
 		initTool p_initTool, setToTool p_setToTool,
 		setFinish p_setFinish, endTool p_endTool);
 	bool setValue(string name, void* data);

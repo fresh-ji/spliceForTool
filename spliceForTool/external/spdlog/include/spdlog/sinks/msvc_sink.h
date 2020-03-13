@@ -1,5 +1,7 @@
+//
 // Copyright(c) 2016 Alexander Dalshov.
 // Distributed under the MIT License (http://opensource.org/licenses/MIT)
+//
 
 #pragma once
 
@@ -29,7 +31,7 @@ protected:
     {
 
         fmt::memory_buffer formatted;
-        base_sink<Mutex>::formatter_->format(msg, formatted);
+        sink::formatter_->format(msg, formatted);
         OutputDebugStringA(fmt::to_string(formatted).c_str());
     }
 

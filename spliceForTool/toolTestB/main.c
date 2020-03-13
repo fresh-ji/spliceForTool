@@ -1,4 +1,4 @@
-﻿
+﻿﻿
 #include <tchar.h>
 #include <Windows.h>
 #include <stdio.h>
@@ -55,14 +55,14 @@ void initTool(double startTime, double step) {
 void setToTool(double time, char* name, void* data) {
 	printf("i received data at %f for %s\n", time, name);
 	/*if (strcmp(name, "topic_002") == 0) {
-		UDPosition* pos = (UDPosition*)data;
-		printf("info:\n");
-		printf("longitude : %s\n", pos->longitude);
-		printf("latitude : %s\n", pos->latitude);
-		printf("altitude : %s\n", pos->altitude);
-		printf("x : %s\n", pos->x);
-		printf("y : %s\n", pos->y);
-		printf("z : %s\n", pos->z);
+	UDPosition* pos = (UDPosition*)data;
+	printf("info:\n");
+	printf("longitude : %s\n", pos->longitude);
+	printf("latitude : %s\n", pos->latitude);
+	printf("altitude : %s\n", pos->altitude);
+	printf("x : %s\n", pos->x);
+	printf("y : %s\n", pos->y);
+	printf("z : %s\n", pos->z);
 	}
 	else */if (strcmp(name, "topic_003") == 0)
 	{
@@ -123,11 +123,11 @@ int main(int argc, char *argv[]) {
 		initTool, setToTool, setFinish, endTool);
 
 	/*while (1) {
-		Sleep(30);
-		if (endFlag == 1) {
-			FreeLibrary(hInstC);
-			break;
-		}
+	Sleep(30);
+	if (endFlag == 1) {
+	FreeLibrary(hInstC);
+	break;
+	}
 	}*/
 
 	//static UDPosition pos;
@@ -142,21 +142,21 @@ int main(int argc, char *argv[]) {
 	int time = 1;
 	/*while (1)
 	{
-		pos.longitude = pos.longitude + 1;
-		pos.latitude = pos.latitude + 1;
-		pos.altitude = pos.altitude + 1;
-		pos.x = pos.x + 1;
-		pos.y = pos.y + 1;
-		pos.z = pos.z + 1;
+	pos.longitude = pos.longitude + 1;
+	pos.latitude = pos.latitude + 1;
+	pos.altitude = pos.altitude + 1;
+	pos.x = pos.x + 1;
+	pos.y = pos.y + 1;
+	pos.z = pos.z + 1;
 
-		setFun(topic_name, (void*)&pos);
-		if (time % 3 == 0)
-		{
-			setFun(topic_name2, (void*)NULL);
-		}
+	setFun(topic_name, (void*)&pos);
+	if (time % 3 == 0)
+	{
+	setFun(topic_name2, (void*)NULL);
+	}
 
-		time++;
-		Sleep(1000);
+	time++;
+	Sleep(1000);
 	}*/
 
 	getchar();

@@ -22,7 +22,7 @@
 * @param       [in]               p_setFinish   允许工具推进
 * @param       [in]               p_endTool     结束工具
 */
-extern "C" SPLICEFORTOOL_API int dllStart(char* configName,
+extern "C" SPLICEFORTOOL_API char* dllStart(char* configName,
 	initTool p_initTool, setToTool p_setToTool,
 	setFinish p_setFinish, endTool p_endTool);
 
@@ -31,14 +31,14 @@ extern "C" SPLICEFORTOOL_API int dllStart(char* configName,
 * @param       [in]               name          数据名
 * @param       [in]               data          数据值
 */
-extern "C" SPLICEFORTOOL_API int dllSetValue(char* name, void* data);
+extern "C" SPLICEFORTOOL_API int dllSetValue(char* token, char* name, void* data);
 
 /**
 * @brief       dllAdvance                       向dll请求推进
 */
-extern "C" SPLICEFORTOOL_API int dllAdvance();
+extern "C" SPLICEFORTOOL_API int dllAdvance(char* token);
 
 /**
 * @brief       dllEnd						    向dll请求结束
 */
-extern "C" SPLICEFORTOOL_API int dllEnd();
+extern "C" SPLICEFORTOOL_API int dllEnd(char* token);

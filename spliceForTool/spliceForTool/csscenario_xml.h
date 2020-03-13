@@ -8,8 +8,8 @@
 #include <fstream>
 
 #include "xml_define.h"
-#include "cssimlog.h"
-#include "cssimlog_export.h"
+
+//#include "cssimlog.h"
 
 #include "rapidxml/rapidxml.hpp"
 #include "rapidxml/rapidxml_print.hpp"
@@ -45,7 +45,6 @@ protected:
 	bool ParserScenarioInfo(xml_node<char>*& parent_node);
 	bool ParserTypeDefine(xml_node<char>*& parent_ndoe);
 	bool ParserTopicDefine(xml_node<char>*& parent_ndoe);
-
 	bool ParserPublishSubscribe(xml_node<char>*& parent_ndoe);
 
 private:

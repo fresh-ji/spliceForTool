@@ -1,20 +1,30 @@
-// Copyright(c) 2015-present, Gabi Melman & spdlog contributors.
+//
+// Copyright(c) 2015 Gabi Melman.
 // Distributed under the MIT License (http://opensource.org/licenses/MIT)
+//
 
 #pragma once
 
-// Fast asynchronous logger.
-// Uses pre allocated queue.
+// Very fast asynchronous logger (millions of logs per second on an average
+// desktop)
+// Uses pre allocated lockfree queue for maximum throughput even under large
+// number of threads.
 // Creates a single back thread to pop messages from the queue and log them.
 //
 // Upon each log write the logger:
 //    1. Checks if its log level is enough to log the message
 //    2. Push a new copy of the message to a queue (or block the caller until
 //    space is available in the queue)
+//    3. will throw spdlog_ex upon log exceptions
 // Upon destruction, logs all remaining messages in the queue before
 // destructing..
 
+#include "spdlog/common.h"
 #include "spdlog/logger.h"
+
+#include <chrono>
+#include <memory>
+#include <string>
 
 namespace spdlog {
 
@@ -37,11 +47,7 @@ class async_logger final : public std::enable_shared_from_this<async_logger>, pu
 public:
     template<typename It>
     async_logger(std::string logger_name, It begin, It end, std::weak_ptr<details::thread_pool> tp,
-        async_overflow_policy overflow_policy = async_overflow_policy::block)
-        : logger(std::move(logger_name), begin, end)
-        , thread_pool_(std::move(tp))
-        , overflow_policy_(overflow_policy)
-    {}
+        async_overflow_policy overflow_policy = async_overflow_policy::block);
 
     async_logger(std::string logger_name, sinks_init_list sinks_list, std::weak_ptr<details::thread_pool> tp,
         async_overflow_policy overflow_policy = async_overflow_policy::block);
@@ -64,6 +70,4 @@ private:
 };
 } // namespace spdlog
 
-#ifdef SPDLOG_HEADER_ONLY
-#include "async_logger-inl.h"
-#endif
+#include "details/async_logger_impl.h"
