@@ -36,7 +36,7 @@ public:
 
     static const char *getKeyList()
     {
-        return "subjectId";
+        return "";
     }
 
     static const char *getTypeName()

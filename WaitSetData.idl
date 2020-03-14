@@ -9,5 +9,5 @@ module WaitSetData
 		string topicName;
 		string content;
 	};
-#pragma keylist Msg subjectId
+#pragma keylist Msg
 };
