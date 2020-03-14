@@ -27,19 +27,19 @@
     <ClInclude Include="spliceForTool.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="csscenario_xml.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="Interface.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="xml_define.h">
+    <ClInclude Include="DDSapi.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="csilog.h">
+    <ClInclude Include="definition.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="cssimlog.h">
+    <ClInclude Include="JSONapi.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="XMLapi.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -53,13 +53,16 @@
     <ClCompile Include="dllmain.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="csscenario_xml.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="Interface.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="cssimlog.cpp">
+    <ClCompile Include="DDSapi.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="JSONapi.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="XMLapi.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

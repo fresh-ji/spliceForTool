@@ -3,19 +3,13 @@
 #define CS_SCENARIO_XML_H
 
 #include <map>
-#include <string>
-#include <unordered_map>
-#include <fstream>
-
-#include "xml_define.h"
-
-//#include "cssimlog.h"
 
 #include "rapidxml/rapidxml.hpp"
 #include "rapidxml/rapidxml_print.hpp"
 #include "rapidxml/rapidxml_utils.hpp"
 
-using namespace std;
+#include "definition.h"
+
 using namespace rapidxml;
 
 class CSEntity;

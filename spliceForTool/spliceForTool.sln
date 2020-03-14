@@ -66,6 +66,7 @@ Global
 		{8F67650E-B85F-4C50-9DC4-DC81156B0B17}.Release|Win32.ActiveCfg = Release|Win32
 		{8F67650E-B85F-4C50-9DC4-DC81156B0B17}.Release|Win32.Build.0 = Release|Win32
 		{8F67650E-B85F-4C50-9DC4-DC81156B0B17}.Release|x64.ActiveCfg = Release|x64
+		{8F67650E-B85F-4C50-9DC4-DC81156B0B17}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

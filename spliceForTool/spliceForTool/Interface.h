@@ -3,42 +3,19 @@
 #define _INTERFACE_
 
 #include <thread>
-#include <iostream>
-#include <fstream>
-#include <random>
-#include <stdlib.h>
-#include <cassert>
 
-#include "WaitSetData_DCPS.hpp"
+//#include <fstream>
+//#include <random>
+//#include <stdlib.h>
+//#include <cassert>
 
-#include "csscenario_xml.h"
+#include "definition.h"
+#include "DDSapi.h"
+#include "JSONapi.h"
+#include "XMLapi.h"
 
-#include "rapidjson/document.h"
-#include "rapidjson/writer.h"
-#include "rapidjson/stringbuffer.h"
+class DDSapi;
 
-///#include "cssimlog.h"
-
-using namespace rapidjson;
-
-typedef void(*initTool)(double, double);
-typedef void(*setToTool)(double, char*, void*);
-typedef void(*setFinish)(double);
-typedef void(*endTool)();
-
-#define ACQUIRE_READY_STATE "acquire_ready_state"
-#define NODE_READY "node_ready"
-#define INITIAL_FEDERATE "initial_federate"
-#define ADVANCE_REQUEST "advance_request"
-#define ADVANCE_GRANT "advance_grant"
-#define SIMULATION_RUN "simulation_run"
-#define SIMULATION_END "simulation_end"
-
-#define ENGINENAME "SIMUengine777"
-
-#define STDOUTTEST
-
-using namespace std;
 using namespace WaitSetData;
 
 class Interface {
@@ -55,35 +32,20 @@ public:
 
 	bool process(Msg);
 
-private:
-	// node management
+public:
 	string systemId;
 	int systemRunId;
 	string nodeName;
-
-	// 解析配置文件
-	bool parseConfig();
-
-	//转换结构体数据至json
-	string ConvertTypeData2Json(string name, void* data);
-
-	//转换json至结构体数据
-	char* ConvertJson2TypeData(string name, string data);
+	vector<string> pubNames;
+	vector<string> subNames;
 
 	// time management
 	double currentTime;
 	double step;
 
-	// 订阅发布
-	vector<string> pubNames;
-	vector<string> subNames;
-
-	// DDS相关
-	map<string, dds::pub::DataWriter<Msg>> writers;
-	map<string, dds::sub::DataReader<Msg>> readers;
-	dds::core::cond::WaitSet waitSet;
-	bool startServerDDS();
-	bool publish(string, string);
+private:
+	// 解析配置文件
+	bool parseConfig();
 
 	// data management
 	map<string, string> dataMap;
@@ -95,8 +57,10 @@ private:
 	setFinish p_setFinish;
 	endTool p_endTool;
 
-	// 配置文件解析
-	CSScenarioXML xml_parser_;
+public:
+	DDSapi *p_DDSapi;
+	JSONapi *p_JSONapi;
+	CSScenarioXML *p_XMLapi;
 };
 
 #endif

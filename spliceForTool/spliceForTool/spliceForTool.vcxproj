@@ -151,18 +151,18 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="csilog.h" />
-    <ClInclude Include="csscenario_xml.h" />
-    <ClInclude Include="cssimlog.h" />
+    <ClInclude Include="XMLapi.h" />
+    <ClInclude Include="DDSapi.h" />
+    <ClInclude Include="definition.h" />
     <ClInclude Include="Interface.h" />
+    <ClInclude Include="JSONapi.h" />
     <ClInclude Include="spliceForTool.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="xml_define.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="csscenario_xml.cpp" />
-    <ClCompile Include="cssimlog.cpp" />
+    <ClCompile Include="XMLapi.cpp" />
+    <ClCompile Include="DDSapi.cpp" />
     <ClCompile Include="dllmain.cpp">
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</CompileAsManaged>
       <CompileAsManaged Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</CompileAsManaged>
@@ -178,6 +178,7 @@
       </PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Interface.cpp" />
+    <ClCompile Include="JSONapi.cpp" />
     <ClCompile Include="spliceForTool.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

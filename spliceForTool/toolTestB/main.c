@@ -3,6 +3,12 @@
 #include <Windows.h>
 #include <stdio.h>
 
+//#include <experimental/filesystem>
+//#include <filesystem>
+
+//using namespace std;
+//namespace fs = std::experimental::filesystem::v1;
+
 typedef struct _UDPosition {
 	double longitude;
 	double latitude;
