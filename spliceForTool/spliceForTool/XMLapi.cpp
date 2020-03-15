@@ -281,7 +281,9 @@ bool CSScenarioXML::ParserPublishSubscribe(xml_node<char>*& parent_node) {
 		}
 
 		pub_sub_[model_name] = pub_sub_item;
-		all_node_.push_back(model_name);
+		if (strcmp(ENGINENAME, model_name.c_str())) {
+			all_node_.push_back(model_name);
+		}
 	}
 	string msg = "parse Models successed";
 	// TODO LogSEInfo(msg);

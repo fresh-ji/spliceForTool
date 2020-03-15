@@ -6,7 +6,7 @@ bool wsServe(dds::core::cond::WaitSet waitSet, string systemId) {
 
 #ifdef STDOUTTEST
 	cout << "[info] <" << systemId << "> "
-		<< "dds detached thread starts well" << endl;
+		<< "dds detached thread starts" << endl;
 #endif
 	string msg;
 	msg = systemId + " dds detached thread starts";
@@ -19,6 +19,26 @@ bool wsServe(dds::core::cond::WaitSet waitSet, string systemId) {
 
 #ifdef STDOUTTEST
 			cout << "[error] <" << systemId << "> "
+				"dds thread:" << e.what() << endl;
+#endif
+			msg = systemId + " dds thread : " + e.what();
+			// TODO LogDDSErr(msg);
+			return false;
+		}
+		catch (runtime_error& e) {
+
+#ifdef STDOUTTEST
+			cout << "[error] <" << systemId << "> "
+				"dds thread:" << e.what() << endl;
+#endif
+			msg = systemId + " dds thread : " + e.what();
+			// TODO LogDDSErr(msg);
+			return false;
+		}
+		catch (exception &e) {
+
+#ifdef STDOUTTEST
+			cout << "[exception] <" << systemId << "> "
 				"dds thread:" << e.what() << endl;
 #endif
 			msg = systemId + " dds thread : " + e.what();
