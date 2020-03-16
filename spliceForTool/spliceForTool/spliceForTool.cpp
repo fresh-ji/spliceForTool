@@ -9,7 +9,7 @@ char* dllStart(char* configName,
 	initTool p_initTool, setToTool p_setToTool,
 	setFinish p_setFinish, endTool p_endTool) {
 
-	Interface *i = new Interface();
+	Interface* i = new Interface();
 
 	string ret = i->start(configName,
 		p_initTool, p_setToTool, p_setFinish, p_endTool);
@@ -25,7 +25,11 @@ char* dllStart(char* configName,
 	else {
 		//TODO log
 	}
-	return const_cast<char*>(ret.c_str());
+
+	char* data = new char[strlen(ret.c_str()) + 1];
+	strcpy(data, ret.c_str());
+
+	return data;
 }
 
 // 2

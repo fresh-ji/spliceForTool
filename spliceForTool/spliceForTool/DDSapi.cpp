@@ -54,7 +54,8 @@ bool DDSapi::startServerDDS() {
 			<< dds::core::policy::Partition("WaitSet example");
 		dds::sub::Subscriber sub(dp, subQos);
 
-		dds::topic::qos::TopicQos topicQos = dp.default_topic_qos();
+		dds::topic::qos::TopicQos topicQos = dp.default_topic_qos()
+			<< dds::core::policy::History::KeepAll();
 
 		for (auto n : i->pubNames) {
 			dds::topic::Topic<Msg> topic(dp, (const string &)n, topicQos);
@@ -74,7 +75,6 @@ bool DDSapi::startServerDDS() {
 			dds::sub::status::DataState *newDataState
 				= new dds::sub::status::DataState();
 			(*newDataState) << dds::sub::status::SampleState::not_read()
-				<< dds::sub::status::ViewState::new_view()
 				<< dds::sub::status::InstanceState::any();
 			ReadCondHandler *readCondHandler =
 				new ReadCondHandler(*newDataState, i);

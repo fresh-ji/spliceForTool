@@ -80,7 +80,7 @@ int main(int argc, char *argv[]) {
 	advanceFun = (FunDLL3)GetProcAddress(hInstC, "dllAdvance");
 	endFun = (FunDLL4)GetProcAddress(hInstC, "dllEnd");
 
-	token = startFun("ZtOE0Jfu_insC.xml",
+	token = startFun("ZtOE0Jfu_insB.xml",
 		initTool, setToTool, setFinish, endTool);
 
 	if ("" == token) {
