@@ -1,7 +1,0 @@
-ADD_SUBDIRECTORY(cssimlog)
-ADD_SUBDIRECTORY(spliceForTool)
-ADD_SUBDIRECTORY(simControl)
-ADD_SUBDIRECTORY(test)
-
-
-
