@@ -24,7 +24,6 @@ INCLUDE_DIRECTORIES(
 LINK_DIRECTORIES( 
 				${CMAKE_LIBRARY_OUTPUT_DIRECTORY} 
 				${CMAKE_SOURCE_DIR}/spliceForTool/external/OpenSplice/x64/lib
-				${CMAKE_SOURCE_DIR}/spliceForTool/external/ospl
 )
 
 ################################################################################################${CS_BROWSER_MOC_SRCS}
@@ -42,6 +41,5 @@ SET_TARGET_PROPERTIES(${CURRENT_PROJ_NAME} PROPERTIES FOLDER "test")
 #链接库
 TARGET_LINK_LIBRARIES(toolTestC
   cssimlog
-  spliceForTool
 )
 
