@@ -23,13 +23,15 @@ INCLUDE_DIRECTORIES(
 					${CMAKE_SOURCE_DIR}/spliceForTool/external
 					${CMAKE_SOURCE_DIR}/spliceForTool/external/rapidxml
 					${CMAKE_SOURCE_DIR}/spliceForTool/cssimlog
+					${CMAKE_SOURCE_DIR}/spliceForTool/dds/csdds_msg_type
+					${CMAKE_SOURCE_DIR}/spliceForTool/dds/dds_service
 )
 
 #库目录
 LINK_DIRECTORIES( 
 				${CMAKE_LIBRARY_OUTPUT_DIRECTORY} 
 				${CMAKE_SOURCE_DIR}/spliceForTool/external/OpenSplice/x64/lib
-				${CMAKE_SOURCE_DIR}/spliceForTool/external/ospl
+				
 				)
 
 ################################################################################################${CS_BROWSER_MOC_SRCS}
@@ -49,6 +51,8 @@ TARGET_LINK_LIBRARIES(spliceForTool
   cssimlog
   dcpsisocpp2
   ddskernel
-  DemoTypes
+  #DemoTypes
+  csdds_msg_type
+  csdds_service
 )
 
