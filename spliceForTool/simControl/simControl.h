@@ -5,30 +5,31 @@
 // SPLICEFORTOOL_API 函数视为是从 DLL 导入的，而此 DLL 则将用此宏定义的
 // 符号视为是被导出的。
 
-#ifdef SIMCONTROL_EXPORTS
-#define SIMCONTROL_API __declspec(dllexport)
-#else
-#define SIMCONTROL_API __declspec(dllimport)
-#endif
+//#ifdef SIMCONTROL_EXPORTS
+//#define SIMCONTROL_API __declspec(dllexport)
+//#else
+//#define SIMCONTROL_API __declspec(dllimport)
+//#endif
 
 #include "simControlInterface.h"
+#include "simControl_export.h"
 
 /**
 * @brief       dllRun                           dll开始
 */
-extern "C" SIMCONTROL_API int dllRun(char* configName);
+extern "C" SIMCONTROL_EXPORT int dllRun(char* configName);
 
 /**
 * @brief       dllPause                         dll暂停
 */
-extern "C" SIMCONTROL_API int dllPause();
+extern "C" SIMCONTROL_EXPORT int dllPause();
 
 /**
 * @brief       dllContinue                      dll继续
 */
-extern "C" SIMCONTROL_API int dllContinue();
+extern "C" SIMCONTROL_EXPORT int dllContinue();
 
 /**
 * @brief       dllEnd                           dll停止
 */
-extern "C" SIMCONTROL_API int dllEnd();
+extern "C" SIMCONTROL_EXPORT int dllEnd();
