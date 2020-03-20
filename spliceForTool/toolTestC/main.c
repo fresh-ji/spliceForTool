@@ -3,6 +3,28 @@
 #include <Windows.h>
 #include <stdio.h>
 
+/*
+* -------INSC-------
+*/
+
+struct UDPosition {
+	double longitude;
+	double latitude;
+	double altitude;
+	double x;
+	double y;
+	double z;
+};
+
+struct UDPosture {
+	int vx;
+	int vy;
+	int vz;
+	int phi;
+	int psi;
+	int gamma;
+};
+
 void initTool(double, double);
 void setToTool(double, char*, void*);
 void setFinish(double);
@@ -10,6 +32,7 @@ void endTool();
 
 int endFlag = 0;
 char* token;
+struct UDPosture topic_003_pe;
 
 // 1
 typedef char*(*FunDLL1)(char*,
@@ -30,6 +53,12 @@ FunDLL4 endFun;
 
 void initTool(double startTime, double step) {
 	printf("i should start at %f and step is %f\n", startTime, step);
+	topic_003_pe.vx = 3;
+	topic_003_pe.vy = 4;
+	topic_003_pe.vz = 5;
+	topic_003_pe.phi = 8.8;
+	topic_003_pe.psi = 9.9;
+	topic_003_pe.gamma = 7.7;
 	advanceFun(token);
 }
 
@@ -38,6 +67,14 @@ void setToTool(double time, char* name, void* data) {
 }
 
 void setFinish(double time) {
+	topic_003_pe.vx += 9.87;
+	topic_003_pe.vy += 8.76;
+	topic_003_pe.vz += 7.65;
+	topic_003_pe.phi += 6.54;
+	topic_003_pe.psi += 5.43;
+	topic_003_pe.gamma += 4.32;
+	setFun(token, "topic_003", (void*)&topic_003_pe);
+
 	printf("i did something and go forward to %f\n", time);
 	advanceFun(token);
 }
@@ -80,7 +117,7 @@ int main(int argc, char *argv[]) {
 	advanceFun = (FunDLL3)GetProcAddress(hInstC, "dllAdvance");
 	endFun = (FunDLL4)GetProcAddress(hInstC, "dllEnd");
 
-	token = startFun("ZtOE0Jfu_insC.xml",
+	token = startFun("Inka6XNh_insC.xml",
 		initTool, setToTool, setFinish, endTool);
 
 	if ("" == token) {

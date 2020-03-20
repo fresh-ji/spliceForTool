@@ -3,6 +3,28 @@
 #include <Windows.h>
 #include <stdio.h>
 
+/*
+ * -------INSB-------
+ */
+
+struct UDPosition {
+	double longitude;
+	double latitude;
+	double altitude;
+	double x;
+	double y;
+	double z;
+};
+
+struct UDPosture {
+	int vx;
+	int vy;
+	int vz;
+	int phi;
+	int psi;
+	int gamma;
+};
+
 void initTool(double, double);
 void setToTool(double, char*, void*);
 void setFinish(double);
@@ -10,6 +32,7 @@ void endTool();
 
 int endFlag = 0;
 char* token;
+UDPosition topic_002_pn;
 
 // 1
 typedef char*(*FunDLL1)(char*,
@@ -30,6 +53,12 @@ FunDLL4 endFun;
 
 void initTool(double startTime, double step) {
 	printf("i should start at %f and step is %f\n", startTime, step);
+	topic_002_pn.longitude = 10;
+	topic_002_pn.latitude = 20;
+	topic_002_pn.altitude = 100;
+	topic_002_pn.x = 1.5;
+	topic_002_pn.y = 2.7;
+	topic_002_pn.z = 3.9;
 	advanceFun(token);
 }
 
@@ -38,6 +67,14 @@ void setToTool(double time, char* name, void* data) {
 }
 
 void setFinish(double time) {
+	topic_002_pn.longitude += 6.66;
+	topic_002_pn.latitude += 6.66;
+	topic_002_pn.altitude += 6.66;
+	topic_002_pn.x += 7.88;
+	topic_002_pn.y == 7.88;
+	topic_002_pn.z += 7.88;
+	setFun(token, "topic_002", (void*)&topic_002_pn);
+
 	printf("i did something and go forward to %f\n", time);
 	advanceFun(token);
 }
@@ -80,7 +117,7 @@ int main(int argc, char *argv[]) {
 	advanceFun = (FunDLL3)GetProcAddress(hInstC, "dllAdvance");
 	endFun = (FunDLL4)GetProcAddress(hInstC, "dllEnd");
 
-	token = startFun("ZtOE0Jfu_insB.xml",
+	token = startFun("Inka6XNh_insB.xml",
 		initTool, setToTool, setFinish, endTool);
 
 	if ("" == token) {

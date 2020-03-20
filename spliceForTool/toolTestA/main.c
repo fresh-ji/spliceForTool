@@ -3,7 +3,27 @@
 #include <Windows.h>
 #include <stdio.h>
 
-static double topic_data = 0;
+/*
+* -------INSA-------
+*/
+
+struct UDPosition {
+	double longitude;
+	double latitude;
+	double altitude;
+	double x;
+	double y;
+	double z;
+};
+
+struct UDPosture {
+	int vx;
+	int vy;
+	int vz;
+	int phi;
+	int psi;
+	int gamma;
+};
 
 void initTool(double, double);
 void setToTool(double, char*, void*);
@@ -12,6 +32,7 @@ void endTool();
 
 int endFlag = 0;
 char* token;
+double topic_001_data = 0;
 
 // 1
 typedef char*(*FunDLL1)(char*,
@@ -40,8 +61,9 @@ void setToTool(double time, char* name, void* data) {
 }
 
 void setFinish(double time) {
-	topic_data += 1;
-	setFun(token, "topic_001", (void*)&topic_data);
+	topic_001_data += 2.7;
+	setFun(token, "topic_001", (void*)&topic_001_data);
+
 	printf("i did something and go forward to %f\n", time);
 	advanceFun(token);
 }
@@ -84,7 +106,7 @@ int main(int argc, char *argv[]) {
 	advanceFun = (FunDLL3)GetProcAddress(hInstC, "dllAdvance");
 	endFun = (FunDLL4)GetProcAddress(hInstC, "dllEnd");
 
-	token = startFun("ZtOE0Jfu_insA.xml",
+	token = startFun("Inka6XNh_insA.xml",
 		initTool, setToTool, setFinish, endTool);
 
 	if ("" == token) {
