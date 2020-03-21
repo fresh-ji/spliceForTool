@@ -1,0 +1,13 @@
+
+module WaitSetData
+{
+	struct Msg {
+		long subjectId;
+		string systemId;
+		double time;
+		string from;
+		string topicName;
+		string content;
+	};
+#pragma keylist Msg
+};

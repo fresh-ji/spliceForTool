@@ -8,7 +8,7 @@
 #include <random>
 #include <mutex>
 
-#include "WaitSetData_DCPS.hpp"
+//#include "WaitSetData_DCPS.hpp"
 
 #include "sim_control_csscenario_xml.h"
 #include "rapidjson/document.h"
@@ -17,6 +17,9 @@
 
 #include "cssimlog.h"
 #include "cssimlog_export.h"
+
+#include "csdds_service_export.h"
+#include "dds_service.h"
 
 using namespace rapidjson;
 
@@ -36,7 +39,7 @@ typedef void(*endTool)();
 #define ENGINENAME "SIMUengine777"
 
 using namespace std;
-using namespace WaitSetData;
+//using namespace WaitSetData;
 
 class SimControlInterface {
 
@@ -56,7 +59,8 @@ public:
 	bool simContinue();
 	bool simEnd();
 
-	bool process(Msg);
+	//bool process(Msg);
+	bool process(MsgData msgdata);
 
 private:
 	// node management
@@ -94,11 +98,12 @@ private:
 	std::map <std::string, bool> advance_request_state_;
 
 	// DDSœ‡πÿ
-	map<string, dds::pub::DataWriter<Msg>> writers;
+	/*map<string, dds::pub::DataWriter<Msg>> writers;
 	map<string, dds::sub::DataReader<Msg>> readers;
 	dds::core::cond::WaitSet waitSet;
+
 	bool startServerDDS();
-	bool publish(string, string);
+	bool publish(string, string);*/
 
 	// data management
 	map<string, string> dataMap;
@@ -123,6 +128,7 @@ private:
 	std::chrono::steady_clock::time_point pre_time_;
 
 	std::mutex mx_;
+	CSDDSService * inst;
 };
 
 #endif

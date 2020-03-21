@@ -10,13 +10,19 @@
 //#include <cassert>
 
 #include "definition.h"
-#include "DDSapi.h"
+//#include "DDSapi.h"
 #include "JSONapi.h"
 #include "XMLapi.h"
 
-class DDSapi;
+#include "cssimlog.h"
+#include "cssimlog_export.h"
 
-using namespace WaitSetData;
+#include "csdds_service_export.h"
+#include "dds_service.h"
+
+//class DDSapi;
+
+//using namespace WaitSetData;
 
 class Interface {
 
@@ -30,7 +36,8 @@ public:
 	bool advance();
 	bool end();
 
-	bool process(Msg);
+	//bool process(Msg);
+	bool process(MsgData msgdata);
 
 public:
 	string systemId;
@@ -58,9 +65,10 @@ private:
 	endTool p_endTool;
 
 public:
-	DDSapi *p_DDSapi;
+	//DDSapi *p_DDSapi;
 	JSONapi *p_JSONapi;
 	CSScenarioXML *p_XMLapi;
+	CSDDSService * inst;
 };
 
 #endif

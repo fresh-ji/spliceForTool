@@ -45,6 +45,8 @@ TARGET_LINK_LIBRARIES(controlTest
   simControl
   ddskernel
   dcpsisocpp2
-  DemoTypes
+  #DemoTypes
+  csdds_msg_type
+  csdds_service
 )
 

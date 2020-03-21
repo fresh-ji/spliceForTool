@@ -1,5 +1,5 @@
 
-//#include "stdafx.h"
+#include "stdafx.h"
 #include "simControlInterface.h"
 #include <stdio.h>
 #include <cstdlib>
@@ -7,64 +7,67 @@
 #include <iostream>
 #include <fstream>
 #include <cassert>
+#include <sstream>
 
-class ReadCondHandler {
-public:
-	/**
-	* @param dataState The dataState on which to filter the samples
-	*/
-	ReadCondHandler(dds::sub::status::DataState& dataState)
-		: dataState(dataState) {}
-	void operator() (const dds::sub::cond::ReadCondition& cond) {
-		/** retrieve the DataState from the condition */
-		dds::sub::status::DataState dataState = cond.state_filter();
-		/** retrieve the associated reader from the condition */
-		dds::sub::DataReader<Msg> dr = cond.data_reader();
+using namespace std;
 
-		dds::sub::LoanedSamples<Msg> samples = dr.select().state(dataState).take();
-		// dds::sub::LoanedSamples<Msg> samples = dr.select().content(cond).take();
-		// dds::sub::LoanedSamples<Msg> samples = dr.take();
+//class ReadCondHandler {
+//public:
+//	/**
+//	* @param dataState The dataState on which to filter the samples
+//	*/
+//	ReadCondHandler(dds::sub::status::DataState& dataState)
+//		: dataState(dataState) {}
+//	void operator() (const dds::sub::cond::ReadCondition& cond) {
+//		/** retrieve the DataState from the condition */
+//		dds::sub::status::DataState dataState = cond.state_filter();
+//		/** retrieve the associated reader from the condition */
+//		dds::sub::DataReader<Msg> dr = cond.data_reader();
+//
+//		dds::sub::LoanedSamples<Msg> samples = dr.select().state(dataState).take();
+//		// dds::sub::LoanedSamples<Msg> samples = dr.select().content(cond).take();
+//		// dds::sub::LoanedSamples<Msg> samples = dr.take();
+//
+//		for (dds::sub::LoanedSamples<Msg>::const_iterator sample = samples.begin();
+//			sample < samples.end(); ++sample) {
+//			if ((*sample).info().valid()) {
+//				SimControlInterface::getInstance().process(sample->data());
+//			}
+//		}
+//	}
+//private:
+//	dds::sub::status::DataState& dataState;
+//};
 
-		for (dds::sub::LoanedSamples<Msg>::const_iterator sample = samples.begin();
-			sample < samples.end(); ++sample) {
-			if ((*sample).info().valid()) {
-				SimControlInterface::getInstance().process(sample->data());
-			}
-		}
-	}
-private:
-	dds::sub::status::DataState& dataState;
-};
-
-bool wsServe(dds::core::cond::WaitSet waitSet, string systemId) {
-	cout << "[checked] <" << systemId << "> "
-		<< "dds detached thread starts well" << endl;
-	std::string msg;
-	msg = systemId + "dds detached thread starts well";
-	//LogDDSInfo(msg);
-
-	while (1) {
-		try {
-			waitSet.dispatch();
-		}
-		catch (const dds::core::TimeoutError e) {
-			cout << "[error] <" << systemId << "> "
-				"dds thread:" << e.what() << endl;
-			std::string msg;
-			msg = systemId + "dds thread:" + e.what();
-			LogDDSErr(msg);
-			return false;
-		}
-	}
-	cout << "[checked] <" << systemId << "> "
-		<< "dds detached thread ends" << endl;
-	msg = systemId + "dds detached thread ends";
-	LogDDSInfo(msg);
-	return true;
-}
+//bool wsServe(dds::core::cond::WaitSet waitSet, string systemId) {
+//	cout << "[checked] <" << systemId << "> "
+//		<< "dds detached thread starts well" << endl;
+//	std::string msg;
+//	msg = systemId + "dds detached thread starts well";
+//	//LogDDSInfo(msg);
+//
+//	while (1) {
+//		try {
+//			waitSet.dispatch();
+//		}
+//		catch (const dds::core::TimeoutError e) {
+//			cout << "[error] <" << systemId << "> "
+//				"dds thread:" << e.what() << endl;
+//			std::string msg;
+//			msg = systemId + "dds thread:" + e.what();
+//			LogDDSErr(msg);
+//			return false;
+//		}
+//	}
+//	cout << "[checked] <" << systemId << "> "
+//		<< "dds detached thread ends" << endl;
+//	msg = systemId + "dds detached thread ends";
+//	LogDDSInfo(msg);
+//	return true;
+//}
 
 SimControlInterface::SimControlInterface() {
-	systemRunId = org::opensplice::domain::default_id();
+	//systemRunId = org::opensplice::domain::default_id();
 
 	std::string pt("initialize_log.txt");
 	CSSimLog::Instance()->CreateLog(pt);
@@ -131,7 +134,7 @@ bool SimControlInterface::simRun(string configName)
 		}
 
 		// 3.DDS
-		if (!startServerDDS()) {
+		/*if (!startServerDDS()) {
 			cout << "[error] <" << systemId << "> "
 				<< "start dds fail" << endl;
 
@@ -142,7 +145,15 @@ bool SimControlInterface::simRun(string configName)
 		}
 
 		thread th(wsServe, waitSet, systemId);
-		th.detach();
+		th.detach();*/
+
+		inst = CSDDSService::Instance();
+		inst->Init("dds");
+
+		std::function<bool(MsgData)> cb = std::bind(&SimControlInterface::process, this, placeholders::_1);
+		inst->SetCallBack(cb);
+
+		inst->StartReceiveData();
 
 		cout << "-----CONGRATULATIONS, ALMOST DONE!-----" << endl;
 		
@@ -153,7 +164,21 @@ bool SimControlInterface::simRun(string configName)
 		Sleep(1000);
 		start_flag_ = true;
 		
-		return publish(ACQUIRE_READY_STATE, "me");
+		MsgData data;
+		data.content = "me";
+		data.from = nodeName;
+		data.systemId = systemId;
+		data.time = currentTime;
+		data.topicName = ACQUIRE_READY_STATE;
+		if (inst->write(data))
+		{
+			return true;
+		}
+		else{
+			return false;
+		}
+
+		//return publish(ACQUIRE_READY_STATE, "me");
 	}
 	catch (runtime_error& e) {
 		cout << "[error] <" << systemId << "> "
@@ -190,27 +215,143 @@ bool SimControlInterface::simContinue()
 bool SimControlInterface::simEnd()
 {
 	start_flag_ = false;
-	publish(SIMULATION_END, "me");
+
+	MsgData data;
+	data.content = "me";
+	data.from = nodeName;
+	data.systemId = systemId;
+	data.time = currentTime;
+	data.topicName = SIMULATION_END;
+	if (inst->write(data))
+	{
+		return true;
+	}
+	else{
+		return false;
+	}
+
+	//publish(SIMULATION_END, "me");
 
 	return true;
 }
 
-bool SimControlInterface::process(Msg messageIn) {
+//bool SimControlInterface::process(Msg messageIn) {
+//
+//	if (start_flag_ && !pause_flag_) {
+//
+//		string str;
+//		string str_time = to_string(messageIn.time());
+//		string tName = messageIn.topicName();
+//		string from = messageIn.from();
+//
+//		str = "RECEIVE <";
+//		str = str + tName + "> FROM <" + messageIn.from()
+//			+ "> AT <" + str_time + ">";
+//		cout << str << endl;
+//		LogDDSInfo(str);
+//
+//		string sName = messageIn.systemId();
+//		if (sName != systemId) {
+//			cout << "[error] <" << systemId << "> "
+//				<< "the message is not for me" << endl;
+//
+//			std::string msg;
+//			msg = systemId + "the message is not for me";
+//			LogDDSErr(str);
+//			return false;
+//		}
+//
+//		// prevent history data
+//		if ((currentTime - messageIn.time()) > 10e-5) {
+//			str = "Old Data {";
+//			str = str + str_time + "} at {"
+//				+ to_string(currentTime) + "}";
+//			cout << "[error] <" << systemId << "> "
+//				<< str << endl;
+//
+//			std::string msg;
+//			msg = systemId + str;
+//			LogDDSInfo(msg);
+//			return false;
+//		}
+//
+//		cout << "current time: <" << currentTime << "> message time: < "<< str_time << ">"<< endl;
+//
+//		if (tName == NODE_READY) {
+//			//检测各节点准备状态，发送初始化主题；
+//			ready_state_[from] = true;
+//			cout << "i have accept <" << from << "> is ready" << endl;
+//
+//			std::string msg;
+//			msg = "i have accept <" + from + "> is ready";
+//			LogDDSInfo(msg);
+//
+//			if (CheckAllNodeReadyState())
+//			{
+//				cout << "all node is ready,start init" << endl;
+//				LogDDSInfo("all node is ready,start init");
+//				publish(INITIAL_FEDERATE, "me");
+//			}
+//		}
+//		else if (tName == ADVANCE_REQUEST) {
+//			mx_.lock();
+//			advance_request_state_[from] = true;
+//			mx_.unlock();
+//			if (CheckAllNodeAdvanceRequestState())
+//			{
+//				ResetAllNodeAdvanceRequestState();
+//
+//				if (first_acquire_flag_)
+//				{
+//					cout << "all nodes are init,start run" << endl;
+//					LogDDSInfo("all nodes are init,start run");
+//
+//					publish(SIMULATION_RUN, "me");
+//					pre_time_ = std::chrono::steady_clock::now();
+//					start_time_ = std::chrono::steady_clock::now();
+//					first_acquire_flag_ = false;
+//				}
+//				else
+//				{
+//					//currentTime++;
+//					cout << "all nodes are acquire advance" << endl;
+//					LogDDSInfo("all nodes are acquire advance");
+//					publish(ADVANCE_GRANT, "me");
+//				}
+//				Sleep(10000);
+//			}
+//		}
+//		else if (tName == SIMULATION_RUN) {
+//			publish(ADVANCE_GRANT, std::to_string(tick_count_));
+//		}
+//		else {
+//			// actual data
+//	
+//		}
+//		return true;
+//	}
+//	else
+//	{
+//		return false;
+//	}
+//}
+
+bool SimControlInterface::process(MsgData msgdata) {
 
 	if (start_flag_ && !pause_flag_) {
 
 		string str;
-		string str_time = to_string(messageIn.time());
-		string tName = messageIn.topicName();
-		string from = messageIn.from();
+		string str_time = to_string(msgdata.time);
+		string tName = msgdata.topicName;
+		string from = msgdata.from;
 
 		str = "RECEIVE <";
-		str = str + tName + "> FROM <" + messageIn.from()
+		str = str + tName + "> FROM <" + msgdata.from
 			+ "> AT <" + str_time + ">";
 		cout << str << endl;
 		LogDDSInfo(str);
 
-		string sName = messageIn.systemId();
+		string sName = msgdata.systemId;
 		if (sName != systemId) {
 			cout << "[error] <" << systemId << "> "
 				<< "the message is not for me" << endl;
@@ -222,7 +363,7 @@ bool SimControlInterface::process(Msg messageIn) {
 		}
 
 		// prevent history data
-		if ((currentTime - messageIn.time()) > 10e-5) {
+		if ((currentTime - msgdata.time) > 10e-5) {
 			str = "Old Data {";
 			str = str + str_time + "} at {"
 				+ to_string(currentTime) + "}";
@@ -235,7 +376,7 @@ bool SimControlInterface::process(Msg messageIn) {
 			return false;
 		}
 
-		cout << "current time: <" << currentTime << "> message time: < "<< str_time << ">"<< endl;
+		cout << "current time: <" << currentTime << "> message time: < " << str_time << ">" << endl;
 
 		if (tName == NODE_READY) {
 			//检测各节点准备状态，发送初始化主题；
@@ -250,7 +391,16 @@ bool SimControlInterface::process(Msg messageIn) {
 			{
 				cout << "all node is ready,start init" << endl;
 				LogDDSInfo("all node is ready,start init");
-				publish(INITIAL_FEDERATE, "me");
+
+				MsgData data;
+				data.content = "me";
+				data.from = nodeName;
+				data.systemId = systemId;
+				data.time = currentTime;
+				data.topicName = INITIAL_FEDERATE;
+				inst->write(data);
+
+				//publish(INITIAL_FEDERATE, "me");
 			}
 		}
 		else if (tName == ADVANCE_REQUEST) {
@@ -266,7 +416,16 @@ bool SimControlInterface::process(Msg messageIn) {
 					cout << "all nodes are init,start run" << endl;
 					LogDDSInfo("all nodes are init,start run");
 
-					publish(SIMULATION_RUN, "me");
+					MsgData data;
+					data.content = "me";
+					data.from = nodeName;
+					data.systemId = systemId;
+					data.time = currentTime;
+					data.topicName = SIMULATION_RUN;
+					inst->write(data);
+
+					//publish(SIMULATION_RUN, "me");
+
 					pre_time_ = std::chrono::steady_clock::now();
 					start_time_ = std::chrono::steady_clock::now();
 					first_acquire_flag_ = false;
@@ -276,17 +435,40 @@ bool SimControlInterface::process(Msg messageIn) {
 					//currentTime++;
 					cout << "all nodes are acquire advance" << endl;
 					LogDDSInfo("all nodes are acquire advance");
-					publish(ADVANCE_GRANT, "me");
+
+					current_time_ = std::chrono::steady_clock::now();
+					double diff = std::chrono::duration_cast<std::chrono::milliseconds>(current_time_ - start_time_).count();
+					currentTime = diff / 1000;
+					tick_count_++;
+
+					MsgData data;
+					data.content = "me";
+					data.from = nodeName;
+					data.systemId = systemId;
+					data.time = currentTime;
+					data.topicName = ADVANCE_GRANT;
+					inst->write(data);
+
+					//publish(ADVANCE_GRANT, "me");
 				}
 				Sleep(10000);
 			}
 		}
 		else if (tName == SIMULATION_RUN) {
-			publish(ADVANCE_GRANT, std::to_string(tick_count_));
+
+			MsgData data;
+			data.content = to_string(tick_count_);
+			data.from = nodeName;
+			data.systemId = systemId;
+			data.time = currentTime;
+			data.topicName = ADVANCE_GRANT;
+			inst->write(data);
+
+			//publish(ADVANCE_GRANT, std::to_string(tick_count_));
 		}
 		else {
 			// actual data
-	
+
 		}
 		return true;
 	}
@@ -296,82 +478,82 @@ bool SimControlInterface::process(Msg messageIn) {
 	}
 }
 
-bool SimControlInterface::startServerDDS() {
-
-	dds::domain::DomainParticipant dp(systemRunId);
-
-	dds::pub::qos::PublisherQos pubQos
-		= dp.default_publisher_qos()
-		<< dds::core::policy::Partition("WaitSet example");
-	dds::pub::Publisher pub(dp, pubQos);
-
-	dds::sub::qos::SubscriberQos subQos
-		= dp.default_subscriber_qos()
-		<< dds::core::policy::Partition("WaitSet example");
-	dds::sub::Subscriber sub(dp, subQos);
-
-	dds::topic::qos::TopicQos topicQos = dp.default_topic_qos();
-
-	for (auto n : pubNames) {
-		dds::topic::Topic<Msg> topic(dp, (const string &)n, topicQos);
-
-		dds::pub::qos::DataWriterQos dwqos = topic.qos();
-		dwqos << dds::core::policy::WriterDataLifecycle
-			::AutoDisposeUnregisteredInstances();
-		dds::pub::DataWriter<Msg> dw(pub, topic, dwqos);
-		writers.insert(make_pair(n, dw));
-	}
-
-	for (auto n : subNames) {
-		dds::topic::Topic<Msg> topic(dp, (const string &)n, topicQos);
-
-		dds::sub::qos::DataReaderQos drqos = topic.qos();
-		dds::sub::DataReader<Msg> dr(sub, topic, drqos);
-		readers.insert(make_pair(n, dr));
-
-		dds::sub::status::DataState *newDataState
-			= new dds::sub::status::DataState();
-		(*newDataState) << dds::sub::status::SampleState::not_read()
-			<< dds::sub::status::ViewState::new_view()
-			<< dds::sub::status::InstanceState::any();
-		ReadCondHandler *readCondHandler =
-			new ReadCondHandler(*newDataState);
-		dds::sub::cond::ReadCondition readCond(
-			dr, *newDataState, *readCondHandler);
-
-		waitSet += readCond;
-	}
-	return true;
-}
-
-bool SimControlInterface::publish(string topic, string data) {
-	random_device rd;
-	mt19937 mt(rd());
-
-	if (topic == "advance_grant")
-	{
-		//currentTime++;
-
-		current_time_ = std::chrono::steady_clock::now();
-		double diff = std::chrono::duration_cast<std::chrono::milliseconds>
-			(current_time_ - start_time_).count();
-		currentTime = diff / 1000;
-		tick_count_++;
-	}
-
-	Msg message;
-	message.subjectId() = mt();
-	message.systemId() = systemId;
-	message.from() = nodeName;
-	message.time() = currentTime;
-	message.topicName() = topic;
-	message.content() = data;
-
-	dds::pub::DataWriter<Msg> writer = writers.at(topic);
-	writer << message;
-
-	return true;
-}
+//bool SimControlInterface::startServerDDS() {
+//
+//	dds::domain::DomainParticipant dp(systemRunId);
+//
+//	dds::pub::qos::PublisherQos pubQos
+//		= dp.default_publisher_qos()
+//		<< dds::core::policy::Partition("WaitSet example");
+//	dds::pub::Publisher pub(dp, pubQos);
+//
+//	dds::sub::qos::SubscriberQos subQos
+//		= dp.default_subscriber_qos()
+//		<< dds::core::policy::Partition("WaitSet example");
+//	dds::sub::Subscriber sub(dp, subQos);
+//
+//	dds::topic::qos::TopicQos topicQos = dp.default_topic_qos();
+//
+//	for (auto n : pubNames) {
+//		dds::topic::Topic<Msg> topic(dp, (const string &)n, topicQos);
+//
+//		dds::pub::qos::DataWriterQos dwqos = topic.qos();
+//		dwqos << dds::core::policy::WriterDataLifecycle
+//			::AutoDisposeUnregisteredInstances();
+//		dds::pub::DataWriter<Msg> dw(pub, topic, dwqos);
+//		writers.insert(make_pair(n, dw));
+//	}
+//
+//	for (auto n : subNames) {
+//		dds::topic::Topic<Msg> topic(dp, (const string &)n, topicQos);
+//
+//		dds::sub::qos::DataReaderQos drqos = topic.qos();
+//		dds::sub::DataReader<Msg> dr(sub, topic, drqos);
+//		readers.insert(make_pair(n, dr));
+//
+//		dds::sub::status::DataState *newDataState
+//			= new dds::sub::status::DataState();
+//		(*newDataState) << dds::sub::status::SampleState::not_read()
+//			<< dds::sub::status::ViewState::new_view()
+//			<< dds::sub::status::InstanceState::any();
+//		ReadCondHandler *readCondHandler =
+//			new ReadCondHandler(*newDataState);
+//		dds::sub::cond::ReadCondition readCond(
+//			dr, *newDataState, *readCondHandler);
+//
+//		waitSet += readCond;
+//	}
+//	return true;
+//}
+//
+//bool SimControlInterface::publish(string topic, string data) {
+//	random_device rd;
+//	mt19937 mt(rd());
+//
+//	if (topic == "advance_grant")
+//	{
+//		//currentTime++;
+//
+//		current_time_ = std::chrono::steady_clock::now();
+//		double diff = std::chrono::duration_cast<std::chrono::milliseconds>
+//			(current_time_ - start_time_).count();
+//		currentTime = diff / 1000;
+//		tick_count_++;
+//	}
+//
+//	Msg message;
+//	message.subjectId() = mt();
+//	message.systemId() = systemId;
+//	message.from() = nodeName;
+//	message.time() = currentTime;
+//	message.topicName() = topic;
+//	message.content() = data;
+//
+//	dds::pub::DataWriter<Msg> writer = writers.at(topic);
+//	writer << message;
+//
+//	return true;
+//}
 
 string SimControlInterface::ConvertTypeData2Json(string topic_name, void* data_ptr) {
 
@@ -595,49 +777,3 @@ bool SimControlInterface::ResetAllNodeAdvanceRequestState()
 	return true;
 }
 
-/*
-bool Interface::parseConfig() {
-// File Check
-ifstream in("config.ini");
-stringstream ss;
-ss << in.rdbuf();
-if (ss.fail()) {
-cout << "[error] config file not found" << endl;
-return false;
-}
-INI::Parser p(ss);
-// System Name
-systemId = p.top()("SYSTEM")["id"];
-// Node Name
-nodeName = p.top()("NODE")["name"];
-cout << "[checked] <" << systemId << "> "
-"node name:" << nodeName << endl;
-// P & S
-int pubNum = stoi(p.top()("PUBLISH")["count"]);
-int subNum = stoi(p.top()("SUBSCRIBE")["count"]);
-const char* pubLine = p.top()("PUBLISH")["names"].c_str();
-const char* subLine = p.top()("SUBSCRIBE")["names"].c_str();
-string token;
-istringstream tokenStreamPub(pubLine);
-while (getline(tokenStreamPub, token, ',')) {
-pubNames.push_back(token);
-}
-istringstream tokenStreamSub(subLine);
-while (getline(tokenStreamSub, token, ',')) {
-subNames.push_back(token);
-}
-if (pubNum != pubNames.size()) {
-cout << "[error] <" << systemId << "> "
-<< "pub size wrong" << endl;
-return false;
-}
-if (subNum != subNames.size()) {
-cout << "[error] <" << systemId << "> "
-<< "sub size wrong" << endl;
-return false;
-}
-cout << "[checked] <" << systemId << "> "
-"publish and subscribe right" << endl;
-return true;
-}
-*/

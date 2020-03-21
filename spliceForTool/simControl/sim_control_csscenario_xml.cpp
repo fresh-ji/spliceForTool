@@ -1,5 +1,5 @@
 ﻿
-//#include "stdafx.h"
+#include "stdafx.h"
 #include "sim_control_csscenario_xml.h"
 
 SimControlCSScenarioXML::SimControlCSScenarioXML(const std::string& xml_path) :file_path_(xml_path) {
