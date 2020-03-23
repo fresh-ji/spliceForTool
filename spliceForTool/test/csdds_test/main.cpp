@@ -121,5 +121,7 @@ int main(int argc, char** argv) {
   }*/
   
   getchar();
+  //inst->StopReceiveData();
+  inst->Clear();
   return 0;
 }

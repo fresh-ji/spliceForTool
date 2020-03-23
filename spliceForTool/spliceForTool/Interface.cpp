@@ -268,6 +268,7 @@ bool Interface::advance() {
 
 bool Interface::end() {
 	// TODO
+	inst->StopReceiveData();
 	return true;
 }
 

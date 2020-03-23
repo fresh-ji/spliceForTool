@@ -451,12 +451,24 @@ bool SimControlInterface::process(MsgData msgdata) {
 					tick_count_++;
 
 					MsgData data;
-					data.content = "me";
-					data.from = nodeName;
-					data.systemId = systemId;
-					data.time = currentTime;
-					data.topicName = ADVANCE_GRANT;
-					inst->write(ADVANCE_GRANT,data);
+					if(currentTime > 20){
+						data.content = "me";
+						data.from = nodeName;
+						data.systemId = systemId;
+						data.time = currentTime;
+						data.topicName = SIMULATION_END;
+						inst->write(SIMULATION_END, data);
+					}
+					else{
+						data.content = "me";
+						data.from = nodeName;
+						data.systemId = systemId;
+						data.time = currentTime;
+						data.topicName = ADVANCE_GRANT;
+						inst->write(ADVANCE_GRANT, data);
+					}
+					
+					
 
 					//publish(ADVANCE_GRANT, "me");
 				}
