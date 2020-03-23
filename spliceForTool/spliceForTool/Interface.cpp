@@ -357,7 +357,7 @@ bool Interface::end() {
 //}
 
 
-bool Interface::process(MsgData msgdata)
+bool Interface::process(const MsgData& msgdata)
 {
 	/*std::cout << "=======receive data:===========" << endl;
 	std::cout << "*********************" << endl;

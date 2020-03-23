@@ -37,7 +37,7 @@ public:
 	bool end();
 
 	//bool process(Msg);
-	bool process(MsgData msgdata);
+	bool process(const MsgData&  msgdata);
 
 public:
 	string systemId;
