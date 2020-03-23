@@ -146,10 +146,21 @@ string Interface::start(string configName,
 		inst = CSDDSService::Instance();
 		inst->Init("dds");
 
+		for (auto pubName : pubNames){
+			inst->CreateTopic(pubName);
+			inst->CreateWriter(pubName);
+		}
+
+		for (auto subName : subNames){
+			inst->CreateTopic(subName);
+			inst->CreateReader(subName);
+		}
+
 		std::function<bool(MsgData)> cb = std::bind(&Interface::process, this, placeholders::_1);
 		inst->SetCallBack(cb);
 
 		inst->StartReceiveData();
+		
 
 #ifdef STDOUTTEST
 		cout << "-----CONGRATULATIONS, ALMOST DONE!-----" << endl;
@@ -162,7 +173,7 @@ string Interface::start(string configName,
 		data.systemId = systemId;
 		data.time = currentTime;
 		data.topicName = NODE_READY;
-		if (inst->write(data))
+		if (inst->write(NODE_READY,data))
 		{
 			return systemId;
 		}
@@ -208,7 +219,7 @@ bool Interface::setValue(string topic_name, void* data_ptr) {
 	msgdata.systemId = systemId;
 	msgdata.time = currentTime;
 	msgdata.topicName = topic_name;
-	if (!inst->write(msgdata))
+	if (!inst->write(topic_name,msgdata))
 	{
 		string msg;
 		msg = systemId + " data send fail at " + to_string(currentTime);
@@ -234,7 +245,7 @@ bool Interface::advance() {
 	msgdata.time = currentTime;
 	msgdata.topicName = ADVANCE_REQUEST;
 
-	if (!inst->write(msgdata))
+	if (!inst->write(ADVANCE_REQUEST,msgdata))
 	{
 		string msg;
 		msg = systemId + " advance send fail at " + to_string(currentTime);
@@ -394,7 +405,7 @@ bool Interface::process(MsgData msgdata)
 		msgdata.systemId = systemId;
 		msgdata.time = currentTime;
 		msgdata.topicName = NODE_READY;
-		if (!inst->write(msgdata))
+		if (!inst->write(NODE_READY,msgdata))
 		{
 			string msg;
 			msg = systemId + " data send fail at " + to_string(currentTime);
