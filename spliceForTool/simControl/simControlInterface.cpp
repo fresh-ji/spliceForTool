@@ -153,6 +153,15 @@ bool SimControlInterface::simRun(string configName)
 		std::function<bool(MsgData)> cb = std::bind(&SimControlInterface::process, this, placeholders::_1);
 		inst->SetCallBack(cb);
 
+		for (auto pubName : pubNames){
+			inst->CreateTopic(pubName);
+			inst->CreateWriter(pubName);
+		}
+
+		for (auto subName : subNames){
+			inst->CreateTopic(subName);
+			inst->CreateReader(subName);
+		}
 		inst->StartReceiveData();
 
 		cout << "-----CONGRATULATIONS, ALMOST DONE!-----" << endl;
@@ -170,7 +179,7 @@ bool SimControlInterface::simRun(string configName)
 		data.systemId = systemId;
 		data.time = currentTime;
 		data.topicName = ACQUIRE_READY_STATE;
-		if (inst->write(data))
+		if (inst->write(ACQUIRE_READY_STATE,data))
 		{
 			return true;
 		}
@@ -222,7 +231,7 @@ bool SimControlInterface::simEnd()
 	data.systemId = systemId;
 	data.time = currentTime;
 	data.topicName = SIMULATION_END;
-	if (inst->write(data))
+	if (inst->write(SIMULATION_END,data))
 	{
 		return true;
 	}
@@ -398,7 +407,7 @@ bool SimControlInterface::process(MsgData msgdata) {
 				data.systemId = systemId;
 				data.time = currentTime;
 				data.topicName = INITIAL_FEDERATE;
-				inst->write(data);
+				inst->write(INITIAL_FEDERATE,data);
 
 				//publish(INITIAL_FEDERATE, "me");
 			}
@@ -422,7 +431,7 @@ bool SimControlInterface::process(MsgData msgdata) {
 					data.systemId = systemId;
 					data.time = currentTime;
 					data.topicName = SIMULATION_RUN;
-					inst->write(data);
+					inst->write(SIMULATION_RUN,data);
 
 					//publish(SIMULATION_RUN, "me");
 
@@ -447,11 +456,11 @@ bool SimControlInterface::process(MsgData msgdata) {
 					data.systemId = systemId;
 					data.time = currentTime;
 					data.topicName = ADVANCE_GRANT;
-					inst->write(data);
+					inst->write(ADVANCE_GRANT,data);
 
 					//publish(ADVANCE_GRANT, "me");
 				}
-				Sleep(10000);
+				Sleep(5000);
 			}
 		}
 		else if (tName == SIMULATION_RUN) {
@@ -462,7 +471,7 @@ bool SimControlInterface::process(MsgData msgdata) {
 			data.systemId = systemId;
 			data.time = currentTime;
 			data.topicName = ADVANCE_GRANT;
-			inst->write(data);
+			inst->write(ADVANCE_GRANT,data);
 
 			//publish(ADVANCE_GRANT, std::to_string(tick_count_));
 		}
