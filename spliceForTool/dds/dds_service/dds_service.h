@@ -49,6 +49,7 @@ class CSDDS_SERVICE_EXPORT CSDDSService  {
   void ReadWithWaitSet();
 
   void StartReceiveData();
+  void StopReceiveData();
 
   void SetCallBack(std::function<bool(MsgData)>);
   //void SetCallBack(void *cb);
@@ -62,12 +63,12 @@ class CSDDS_SERVICE_EXPORT CSDDSService  {
   Topic_ptr getTopic(const std::string &topic_name);
   DomainParticipant_ptr getParticipant();
 
-  CSDDSService();
   ~CSDDSService();
   CSDDSService(const CSDDSService&) = delete;
   CSDDSService& operator=(const CSDDSService&) = delete;
 
  private:
+  CSDDSService();
   DomainParticipantFactory_var dpf_;
   DomainParticipant_var participant_;
   DomainId_t domain_id_;

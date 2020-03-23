@@ -431,7 +431,7 @@ void CSDDSService::ReadWithWaitSet(){
 		/*else {
 		std::cout << std::endl << "!!! [INFO] WaitSet timedout  "  << std::endl;
 		}*/
-		
+		//std::this_thread::sleep_for(std::chrono::milliseconds(300));
 	}
 }
 
@@ -441,76 +441,34 @@ void CSDDSService::StartReceiveData(){
 	//read_thread_.detach();
 }
 
+void CSDDSService::StopReceiveData(){
+	/*停止接收数据线程*/
+	if (read_flag_){
+		read_flag_ = false;
+	}
+}
+
 void CSDDSService::SetCallBack(std::function<bool(MsgData)> cb){
 	cb_ = cb;
 }
 
 void CSDDSService::Clear(){
-	bool rv = true;
-	/* Remove all Conditions from the WaitSetData. */
-	for (auto it : conditions_){
-		auto status = newMsgWS->detach_condition(it.second.in());
-		if (!CheckStatus(status, "DDS::WaitSetData::detach_condition (newMsg)")){
-			LogDDSErr("open splice detach_condition : " + it.first + " return code: " + std::to_string(rv))
+	read_flag_ = false;
+
+	try
+	{
+		if (read_thread_.joinable()){
+			read_thread_.join();
 		}
 	}
-	LogDDSInfo("open splice WaitSetData detach_condition done")
-
-	/*删除读者附加的条件*/
-	for (auto it : readers_){
-		auto topic_name = it.first;
-		auto reader = it.second;
-		
-		auto condition_it = conditions_.find(topic_name);
-		if (condition_it != conditions_.end())
-		{
-			auto condition = condition_it->second;
-			reader->delete_readcondition(condition.in());
-		}
+	catch (const std::exception& e)
+	{
+		int i = 0;
 	}
-	LogDDSInfo("open splice readers delete_readcondition done")
-
-	/*停止接收数据线程*/
-	bool read_flag_ = false;
-	if (read_thread_.joinable()){
-		read_thread_.join();
-	}
+	
 	LogDDSInfo("stop read thread done")
 
-	//删除读者
-	for (auto it : readers_){
-		auto status = subscriber_->delete_datareader(it.second);
-		if (!CheckStatus(status, "DDS::Subscriber::delete_datareader ")){
-			LogDDSErr("open splice delete reader: " + it.first + " return code: " + std::to_string(rv))
-		}
-	}
-	LogDDSInfo("open splice delete reader done")
-
-	//删除写者
-	for (auto it : writers_){
-		auto status = publisher_->delete_datawriter(it.second);
-		if (!CheckStatus(status, "DDS::Subscriber::delete_datawriter ")){
-			LogDDSErr("open splice delete writer: " + it.first + " return code: " + std::to_string(rv))
-		}
-	}
-	LogDDSInfo("open splice delete write done")
-
-	//删除发布者
-	participant_->delete_publisher(publisher_);
-	LogDDSInfo("open splice delete publisher done")
-
-	//删除订阅者
-	participant_->delete_subscriber(subscriber_);
-	LogDDSInfo("open splice delete subscriber done")
-
-	//删除主题
-	for (auto it : topics_){
-		auto status = participant_->delete_topic(it.second);
-		if (!CheckStatus(status, "DDS.DomainParticipant.delete_topic")){
-			LogDDSErr("open splice delete topic: " + it.first + " return code: " + std::to_string(rv))
-		}
-	}
-	LogDDSInfo("open splice delete topics done")
+	ReturnCode_t rv = 0;
 
 	//删除参与者
 	if (participant_) {
