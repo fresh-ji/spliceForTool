@@ -18,6 +18,7 @@ CSDDSService::CSDDSService() {
 }
 
 CSDDSService::~CSDDSService() {
+	Clear();
 }
 
 CSDDSService* CSDDSService::Instance() {
@@ -52,7 +53,7 @@ bool CSDDSService::Init(const std::string& partition_name) {
 	if (!CreateReader()){
 		return false;
 	}*/
-
+	newMsgWS = new WaitSet();
 	LogDDSInfo("dds init success")
 
 		return true;
@@ -261,7 +262,7 @@ bool CSDDSService::CreateReader(const std::string& topic_name) {
 		return false;
 	}
 
-	WaitSet_var newMsgWS = new WaitSet();
+	
 	auto status = newMsgWS->attach_condition(newMsg.in());     // ReadCondition
 	if (!CheckStatus(status, "DDS::WaitSetData::attach_condition (newMsg)")){
 		LogDDSErr("attach_condition failed");
@@ -269,7 +270,6 @@ bool CSDDSService::CreateReader(const std::string& topic_name) {
 	}
 
 	conditions_[topic_name] = newMsg;
-	waitsets_[topic_name] = newMsgWS;
 	readers_[topic_name] = reader;
 	return true;
 }
@@ -366,7 +366,7 @@ std::vector<MsgData> CSDDSService::take(const std::string &topic_name){
 
 void CSDDSService::ReadWithWaitSet(){
 	ConditionSeq guardList;
-	guardList.length(4);
+	guardList.length(conditions_.size());
 	MsgSeq msgList;
 	SampleInfoSeq infoSeq;
 
@@ -376,28 +376,22 @@ void CSDDSService::ReadWithWaitSet(){
 	wait_timeout.nanosec = 0;
 
 	while (read_flag_){
-		//dataqueue.clear();
-
-		for (auto r : readers_){
-			auto topic_name = r.first;
-			
-			auto newMsg = conditions_[topic_name];
-			auto newMsgWS = waitsets_[topic_name];
-			auto reader = readers_[topic_name];
-		
-
-			auto status = newMsgWS->wait(guardList, wait_timeout);
-			if (status == DDS::RETCODE_OK) {
-				/* Walk over all guards to display information */
-				for (DDS::ULong i = 0; i < guardList.length(); i++)
-				{
-					if (guardList[i].in() == newMsg.in())
+		auto status = newMsgWS->wait(guardList, wait_timeout);
+		if (status == DDS::RETCODE_OK) {
+			/* Walk over all guards to display information */
+			for (DDS::ULong i = 0; i < guardList.length(); i++)
+			{
+				for (auto it : conditions_){
+					auto topic_name = it.first;
+					auto condition = it.second;
+				
+					if (guardList[i].in() == condition.in())
 					{
 						/* The newMsg ReadCondition contains data */
+						auto reader = readers_[topic_name];
 						MsgDataReader_var MsgReader = MsgDataReader::_narrow(reader.in());
 						CheckHandle(MsgReader.in(), "MsgDataReader::_narrow");
-						status = MsgReader->take_w_condition(msgList, infoSeq, LENGTH_UNLIMITED,
-							newMsg.in());
+						status = MsgReader->take_w_condition(msgList, infoSeq, LENGTH_UNLIMITED,condition.in());
 						CheckStatus(status, "WaitSetData::MsgDataReader::take_w_condition");
 
 						for (DDS::ULong j = 0; j < msgList.length(); j++)
@@ -426,23 +420,23 @@ void CSDDSService::ReadWithWaitSet(){
 							CheckStatus(status, "WaitSetData::MsgDataReader::return_loan");
 						}
 					}
-				} /* for */
-			}
-			else if (status != DDS::RETCODE_TIMEOUT) {
-				// DDS_RETCODE_TIMEOUT is considered as an error
-				// only after it has occurred count times
-				CheckStatus(status, "DDS::WaitSetData::wait");
-			}
-			/*else {
-			std::cout << std::endl << "!!! [INFO] WaitSet timedout  "  << std::endl;
-			}*/
-
+				}
+			} /* for */
 		}
+		else if (status != DDS::RETCODE_TIMEOUT) {
+			// DDS_RETCODE_TIMEOUT is considered as an error
+			// only after it has occurred count times
+			CheckStatus(status, "DDS::WaitSetData::wait");
+		}
+		/*else {
+		std::cout << std::endl << "!!! [INFO] WaitSet timedout  "  << std::endl;
+		}*/
 		
 	}
 }
 
 void CSDDSService::StartReceiveData(){
+	read_flag_ = true;
 	read_thread_ = std::thread(&CSDDSService::ReadWithWaitSet, this);
 	//read_thread_.detach();
 }
@@ -451,9 +445,106 @@ void CSDDSService::SetCallBack(std::function<bool(MsgData)> cb){
 	cb_ = cb;
 }
 
-//void CSDDSService::SetCallBack(void *cb){
-//	cb_ = cb;
-//}
+void CSDDSService::Clear(){
+	bool rv = true;
+	/* Remove all Conditions from the WaitSetData. */
+	for (auto it : conditions_){
+		auto status = newMsgWS->detach_condition(it.second.in());
+		if (!CheckStatus(status, "DDS::WaitSetData::detach_condition (newMsg)")){
+			LogDDSErr("open splice detach_condition : " + it.first + " return code: " + std::to_string(rv))
+		}
+	}
+	LogDDSInfo("open splice WaitSetData detach_condition done")
+
+	/*删除读者附加的条件*/
+	for (auto it : readers_){
+		auto topic_name = it.first;
+		auto reader = it.second;
+		
+		auto condition_it = conditions_.find(topic_name);
+		if (condition_it != conditions_.end())
+		{
+			auto condition = condition_it->second;
+			reader->delete_readcondition(condition.in());
+		}
+	}
+	LogDDSInfo("open splice readers delete_readcondition done")
+
+	/*停止接收数据线程*/
+	bool read_flag_ = false;
+	if (read_thread_.joinable()){
+		read_thread_.join();
+	}
+	LogDDSInfo("stop read thread done")
+
+	//删除读者
+	for (auto it : readers_){
+		auto status = subscriber_->delete_datareader(it.second);
+		if (!CheckStatus(status, "DDS::Subscriber::delete_datareader ")){
+			LogDDSErr("open splice delete reader: " + it.first + " return code: " + std::to_string(rv))
+		}
+	}
+	LogDDSInfo("open splice delete reader done")
+
+	//删除写者
+	for (auto it : writers_){
+		auto status = publisher_->delete_datawriter(it.second);
+		if (!CheckStatus(status, "DDS::Subscriber::delete_datawriter ")){
+			LogDDSErr("open splice delete writer: " + it.first + " return code: " + std::to_string(rv))
+		}
+	}
+	LogDDSInfo("open splice delete write done")
+
+	//删除发布者
+	participant_->delete_publisher(publisher_);
+	LogDDSInfo("open splice delete publisher done")
+
+	//删除订阅者
+	participant_->delete_subscriber(subscriber_);
+	LogDDSInfo("open splice delete subscriber done")
+
+	//删除主题
+	for (auto it : topics_){
+		auto status = participant_->delete_topic(it.second);
+		if (!CheckStatus(status, "DDS.DomainParticipant.delete_topic")){
+			LogDDSErr("open splice delete topic: " + it.first + " return code: " + std::to_string(rv))
+		}
+	}
+	LogDDSInfo("open splice delete topics done")
+
+	//删除参与者
+	if (participant_) {
+		rv = participant_->delete_contained_entities();
+	}
+	LogDDSInfo("open splice delete entities return code: " + std::to_string(rv))
+		
+	if (dpf_) {
+		rv = dpf_->delete_participant(participant_);
+	}
+	LogDDSInfo("open splice delete part return code: " + std::to_string(rv))
+	
+	//主题名称，主题
+	topics_.clear();
+	//主题名称，写者
+	writers_.clear();
+	//主题名称，读者
+	readers_.clear();
+	//主题名称，条件
+	conditions_.clear();
+
+	//重置数据
+	participant_ = nullptr;
+	domain_id_ = 0;
+	partition_name_ = "";
+	type_name_ = "";
+
+	publisher_ = nullptr;
+	subscriber_ = nullptr;
+	newMsgWS = nullptr;
+	memset(&wait_timeout, 0,sizeof(wait_timeout));
+
+	LogDDSInfo("opensplice clear")
+}
 
 DataReader_ptr CSDDSService::getReader(const std::string& topic_name)
 {

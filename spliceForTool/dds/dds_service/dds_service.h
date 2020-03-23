@@ -53,6 +53,8 @@ class CSDDS_SERVICE_EXPORT CSDDSService  {
   void SetCallBack(std::function<bool(MsgData)>);
   //void SetCallBack(void *cb);
 
+  void Clear();
+
   DataReader_ptr getReader(const std::string& topic_name);
   DataWriter_ptr getWriter(const std::string& topic_name);
   Publisher_ptr getPublisher();
@@ -81,7 +83,7 @@ class CSDDS_SERVICE_EXPORT CSDDSService  {
   //DataReader_var reader_;
 
   //ReadCondition_var newMsg;
-  //WaitSet_var newMsgWS;
+  WaitSet_var newMsgWS;
   Duration_t wait_timeout;
 
   std::function<bool(MsgData)> cb_;
@@ -92,9 +94,8 @@ class CSDDS_SERVICE_EXPORT CSDDSService  {
   std::map<std::string,Topic_var> topics_;
   std::map<std::string, DataReader_var> readers_;
   std::map<std::string, DataWriter_var> writers_;
-
   std::map<std::string, ReadCondition_var> conditions_;
-  std::map<std::string, WaitSet_var>waitsets_;
+  //std::map<std::string, WaitSet_var>waitsets_;
   //void *cb_;
 };
 
