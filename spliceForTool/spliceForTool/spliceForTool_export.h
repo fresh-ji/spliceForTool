@@ -1,0 +1,42 @@
+
+#ifndef SPLICEFORTOOL_EXPORT_H
+#define SPLICEFORTOOL_EXPORT_H
+
+#ifdef SPLICEFORTOOL_STATIC_DEFINE
+#  define SPLICEFORTOOL_EXPORT
+#  define SPLICEFORTOOL_NO_EXPORT
+#else
+#  ifndef SPLICEFORTOOL_EXPORT
+#    ifdef spliceForTool_EXPORTS
+        /* We are building this library */
+#      define SPLICEFORTOOL_EXPORT __declspec(dllexport)
+#    else
+        /* We are using this library */
+#      define SPLICEFORTOOL_EXPORT __declspec(dllimport)
+#    endif
+#  endif
+
+#  ifndef SPLICEFORTOOL_NO_EXPORT
+#    define SPLICEFORTOOL_NO_EXPORT 
+#  endif
+#endif
+
+#ifndef SPLICEFORTOOL_DEPRECATED
+#  define SPLICEFORTOOL_DEPRECATED __declspec(deprecated)
+#endif
+
+#ifndef SPLICEFORTOOL_DEPRECATED_EXPORT
+#  define SPLICEFORTOOL_DEPRECATED_EXPORT SPLICEFORTOOL_EXPORT SPLICEFORTOOL_DEPRECATED
+#endif
+
+#ifndef SPLICEFORTOOL_DEPRECATED_NO_EXPORT
+#  define SPLICEFORTOOL_DEPRECATED_NO_EXPORT SPLICEFORTOOL_NO_EXPORT SPLICEFORTOOL_DEPRECATED
+#endif
+
+#if 0 /* DEFINE_NO_DEPRECATED */
+#  ifndef SPLICEFORTOOL_NO_DEPRECATED
+#    define SPLICEFORTOOL_NO_DEPRECATED
+#  endif
+#endif
+
+#endif /* SPLICEFORTOOL_EXPORT_H */
