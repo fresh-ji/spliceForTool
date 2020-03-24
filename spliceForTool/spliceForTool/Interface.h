@@ -2,32 +2,21 @@
 #ifndef _INTERFACE_
 #define _INTERFACE_
 
-#include <thread>
+#include <string>
+#include <iostream>
+#include <sstream>
 
-//#include <fstream>
-//#include <random>
-//#include <stdlib.h>
-//#include <cassert>
-
-#include "definition.h"
-//#include "DDSapi.h"
 #include "JSONapi.h"
-#include "XMLapi.h"
+#include "dds_service.h"
 
 #include "cssimlog.h"
 #include "cssimlog_export.h"
 
-#include "csdds_service_export.h"
-#include "dds_service.h"
-
-//class DDSapi;
-
-//using namespace WaitSetData;
-
 class Interface {
 
 public:
-	Interface();
+	static Interface* Instance();
+
 	// real interfaces
 	string start(string configName,
 		initTool p_initTool, setToTool p_setToTool,
@@ -36,12 +25,18 @@ public:
 	bool advance();
 	bool end();
 
-	//bool process(Msg);
-	bool process(const MsgData&  msgdata);
+	~Interface();
+	Interface(const Interface&) = delete;
+	Interface& operator=(const Interface&) = delete;
 
-public:
+private:
+	Interface();
+	bool parseConfig();
+	bool process(const MsgData&  msgdata);
+	bool publish(string, string);
+
 	string systemId;
-	int systemRunId;
+	// int systemRunId;
 	string nodeName;
 	vector<string> pubNames;
 	vector<string> subNames;
@@ -51,9 +46,6 @@ public:
 	double step;
 
 private:
-	// Ω‚Œˆ≈‰÷√Œƒº˛
-	bool parseConfig();
-
 	// data management
 	map<string, string> dataMap;
 	map<string, string> backupDataMap;
@@ -65,10 +57,9 @@ private:
 	endTool p_endTool;
 
 public:
-	//DDSapi *p_DDSapi;
 	JSONapi *p_JSONapi;
 	CSScenarioXML *p_XMLapi;
-	CSDDSService * inst;
+	CSDDSService *p_ddsInst;
 };
 
 #endif
