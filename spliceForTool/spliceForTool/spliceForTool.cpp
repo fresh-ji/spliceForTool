@@ -21,7 +21,7 @@ char* dllStart(char* configName,
 
 // 2
 int dllSetValue(char* name, void* data) {
-	if (!inst) {
+	if (inst) {
 		return (inst->setValue(name, data) ? 1 : 0);
 	}
 	return 0;
@@ -29,7 +29,7 @@ int dllSetValue(char* name, void* data) {
 
 // 3
 int dllAdvance() {
-	if (!inst) {
+	if (inst) {
 		return (inst->advance() ? 1 : 0);
 	}
 	return 0;
@@ -37,7 +37,7 @@ int dllAdvance() {
 
 // 4
 int dllEnd() {
-	if (!inst) {
+	if (inst) {
 		return (inst->end() ? 1 : 0);
 	}
 	return 0;

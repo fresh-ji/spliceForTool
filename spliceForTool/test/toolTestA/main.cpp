@@ -46,18 +46,18 @@ typedef char*(*FunDLL1)(char*,
 	void(*endTool)());
 FunDLL1 startFun;
 // 2
-typedef int(*FunDLL2)(char*, char*, void*);
+typedef int(*FunDLL2)(char*, void*);
 FunDLL2 setFun;
 // 3
-typedef int(*FunDLL3)(char*);
+typedef int(*FunDLL3)();
 FunDLL3 advanceFun;
 // 4
-typedef int(*FunDLL4)(char*);
+typedef int(*FunDLL4)();
 FunDLL4 endFun;
 
 void initTool(double startTime, double step) {
 	printf("i should start at %f and step is %f\n", startTime, step);
-	advanceFun(token);
+	advanceFun();
 }
 
 void setToTool(double time, char* name, void* data) {
@@ -89,13 +89,13 @@ void setToTool(double time, char* name, void* data) {
 
 void setFinish(double time) {
 	topic_data += 1;
-	setFun(token, "topic_001", (void*)&topic_data);
+	setFun("topic_001", (void*)&topic_data);
 	printf("i did something and go forward to %f\n", time);
-	advanceFun(token);
+	advanceFun();
 }
 
 void endTool() {
-	endFun(token);
+	endFun();
 	printf("i am over\n");
 	endFlag = 1;
 }

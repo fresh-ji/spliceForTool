@@ -148,7 +148,7 @@ bool SimControlInterface::simRun(string configName)
 		th.detach();*/
 
 		inst = CSDDSService::Instance();
-		inst->Init("dds");
+		inst->Init(systemId);
 
 		std::function<bool(MsgData)> cb = std::bind(&SimControlInterface::process, this, placeholders::_1);
 		inst->SetCallBack(cb);
@@ -451,7 +451,7 @@ bool SimControlInterface::process(MsgData msgdata) {
 					tick_count_++;
 
 					MsgData data;
-					if(currentTime > 20){
+					if(currentTime > 200){
 						data.content = "me";
 						data.from = nodeName;
 						data.systemId = systemId;
