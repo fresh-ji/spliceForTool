@@ -130,7 +130,7 @@ bool CSDDSService::CreateTopic(const std::string& topic_name) {
 	}
 
 	topics_[topic_name] = topic;
-
+	LogDDSInfo("create topic successed, topic name:" + topic_name)
 	return true;
 }
 
@@ -142,6 +142,8 @@ void CSDDSService::RegisterType()
 	if (!CheckStatus(status, "register_type")) {
 		LogDDSErr("register_type error");
 	}
+
+	LogDDSInfo("dds register_type sucess");
 }
 
 bool CSDDSService::CreatePublisher() {
@@ -182,7 +184,7 @@ bool CSDDSService::CreateSubscriber() {
 		LogDDSErr("create subscribe failed")
 			return false;
 	}
-
+	LogDDSInfo("create subscribe success");
 	return true;
 }
 
@@ -220,10 +222,12 @@ bool CSDDSService::CreateWriter(const std::string& topic_name) {
 		NULL,
 		STATUS_MASK_NONE);
 	if (!CheckHandle(writer, "DDS::Publisher::create_datawriter")) {
+		LogDDSErr("DDS::Publisher::create_datawriter failed")
 		return false;
 	}
 
 	writers_[topic_name] = writer;
+	LogDDSInfo("DDS::Publisher::create_datawriter sucessed")
 	return true;
 }
 
@@ -246,6 +250,7 @@ bool CSDDSService::CreateReader(const std::string& topic_name) {
 	DataReader_var reader = subscriber_->create_datareader(topic.in(),
 		DATAREADER_QOS_USE_TOPIC_QOS, NULL, STATUS_MASK_NONE);
 	if (!CheckHandle(reader, "DDS::Subscriber::create_datareader ()")) {
+		LogDDSErr("create_datareader failed");
 		return false;
 	}
 
@@ -271,6 +276,7 @@ bool CSDDSService::CreateReader(const std::string& topic_name) {
 
 	conditions_[topic_name] = newMsg;
 	readers_[topic_name] = reader;
+	LogDDSInfo("create_datareader sucessed");
 	return true;
 }
 
@@ -388,6 +394,7 @@ void CSDDSService::ReadWithWaitSet(){
 					if (guardList[i].in() == condition.in())
 					{
 						/* The newMsg ReadCondition contains data */
+						LogDDSInfo("receive data，topic_name:" + topic_name);
 						auto reader = readers_[topic_name];
 						MsgDataReader_var MsgReader = MsgDataReader::_narrow(reader.in());
 						CheckHandle(MsgReader.in(), "MsgDataReader::_narrow");
@@ -438,6 +445,7 @@ void CSDDSService::ReadWithWaitSet(){
 void CSDDSService::StartReceiveData(){
 	read_flag_ = true;
 	read_thread_ = std::thread(&CSDDSService::ReadWithWaitSet, this);
+	LogDDSInfo("start read thread successed")
 	//read_thread_.detach();
 }
 
@@ -446,10 +454,12 @@ void CSDDSService::StopReceiveData(){
 	if (read_flag_){
 		read_flag_ = false;
 	}
+	LogDDSInfo("stop read thread successed")
 }
 
 void CSDDSService::SetCallBack(std::function<bool(MsgData)> cb){
 	cb_ = cb;
+	LogDDSInfo("set call back successed")
 }
 
 void CSDDSService::Clear(){

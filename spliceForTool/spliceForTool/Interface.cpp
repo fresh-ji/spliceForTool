@@ -28,7 +28,7 @@ string Interface::start(string configName,
 	try {
 		// 1.Read Config
 		if (!p_XMLapi->ReadXML(configName)) {
-			LogDDSErr("parse xml file fail");
+			LogSEErr("parse xml file fail");
 			return "";
 		}
 		systemId = p_XMLapi->GetSystemId();
@@ -41,7 +41,7 @@ string Interface::start(string configName,
 		ifstream infile;
 		infile.open("initialize_log.txt");
 		if (!infile.is_open()) {
-			LogDDSErr("open initialize log file fail");
+			LogSEErr("open initialize log file fail");
 		}
 
 		string csscenario_full_logname = nodeName + ".txt";
@@ -49,7 +49,7 @@ string Interface::start(string configName,
 		outfile.open(csscenario_full_logname);
 		if (!outfile.is_open()) {
 			string msg = "open" + csscenario_full_logname + "fail";
-			LogDDSErr(msg);
+			LogSEErr(msg);
 		}
 
 		CSSimLog::Instance()->CloseLog();
@@ -62,7 +62,7 @@ string Interface::start(string configName,
 		outfile.close();
 		CSSimLog::Instance()->CreateLog(csscenario_full_logname);
 		if (std::remove("initialize_log.txt") == -1) {
-			LogDDSInfo("delete initialize log fail");
+			LogSEErr("delete initialize log fail");
 		}
 
 		// 3.Parameters
@@ -71,6 +71,7 @@ string Interface::start(string configName,
 		this->p_setToTool = p_setToTool;
 		this->p_setFinish = p_setFinish;
 		this->p_endTool = p_endTool;
+		LogSEInfo("set call back successed!");
 
 		// 4.DDS
 		p_ddsInst = CSDDSService::Instance();
@@ -89,7 +90,7 @@ string Interface::start(string configName,
 		function<bool(MsgData)> cb = bind(&Interface::process, this, placeholders::_1);
 		p_ddsInst->SetCallBack(cb);
 		p_ddsInst->StartReceiveData();
-
+		LogSEInfo("start dds successed!");
 		// TODO 处理
 		Sleep(1000);
 		if (publish(NODE_READY, "me")) {
@@ -101,12 +102,12 @@ string Interface::start(string configName,
 	}
 	catch (runtime_error& e) {
 		msg = systemId + " runtime : " + e.what();
-		LogDDSErr(msg);
+		LogSEErr(msg);
 		return "";
 	}
 	catch (exception &e) {
 		msg = systemId + " exception : " + e.what();
-		LogDDSErr(msg);
+		LogSEErr(msg);
 		return "";
 	}
 }
@@ -114,26 +115,33 @@ string Interface::start(string configName,
 bool Interface::setValue(string topic_name, void* data_ptr) {
 	
 	string data = p_JSONapi->ConvertTypeData2Json(topic_name, data_ptr);
+	string msg;
 
 	if (!publish(topic_name, data)) {
-		 string msg = systemId + " data send fail at " + to_string(currentTime);
-		LogDDSErr(msg);
+		 msg = systemId + " data send fail at " + to_string(currentTime);
+		 LogSEErr(msg);
 		return false;
 	}
+	msg = systemId + " data send successed at " + to_string(currentTime);
+	LogSEInfo(msg);
 	return true;
 }
 
 bool Interface::advance() {
+	string msg;
 	if (!publish(ADVANCE_REQUEST, to_string(currentTime))) {
-		string msg = systemId + " advance send fail at " + to_string(currentTime);
+		msg = systemId + " advance send fail at " + to_string(currentTime);
 		LogDDSErr(msg);
 		return false;
 	}
+	msg = systemId + " advance send successed at " + to_string(currentTime);
+	LogSEInfo(msg);
 	return true;
 }
 
 bool Interface::end() {
 	p_ddsInst->StopReceiveData();
+	LogSEInfo("end tool");
 	return true;
 }
 
@@ -161,7 +169,7 @@ bool Interface::process(const MsgData& msgdata) {
 	string sName = msgdata.systemId;
 	if (sName != systemId) {
 		msg = systemId + " the message is not for me";
-		LogDDSErr(msg);
+		LogSEErr(msg);
 		return false;
 	}
 
@@ -172,16 +180,17 @@ bool Interface::process(const MsgData& msgdata) {
 			+ to_string(currentTime) + "}";
 		
 		msg = systemId + str;
-		LogDDSErr(msg);
+		LogSEErr(msg);
 		return false;
 	}
 
 	if (tName == ACQUIRE_READY_STATE) {
 		if (!publish(NODE_READY, to_string(currentTime))) {
 			msg = systemId + " data send fail at " + to_string(currentTime);
-			LogDDSErr(msg);
+			LogSEErr(msg);
 			return false;
 		}
+		LogSEInfo("publish node ready");
 	}
 	else if (tName == INITIAL_FEDERATE) {
 		currentTime = msgdata.time;
@@ -191,6 +200,7 @@ bool Interface::process(const MsgData& msgdata) {
 		ss >> step;
 
 		(*p_initTool)(currentTime, step);
+		LogSEInfo("init tool");
 	}
 	else if (tName == ADVANCE_GRANT) {
 		map<string, string> tempMap = dataMap;
@@ -216,10 +226,12 @@ bool Interface::process(const MsgData& msgdata) {
 		}
 		currentTime = msgdata.time;
 		(*p_setFinish)(currentTime);
+		LogSEInfo("call tool finish funtion done");
 	}
 	else if (tName == SIMULATION_END) {
 		// TODO
 		(*p_endTool)();
+		LogSEInfo("call end interface");
 	}
 	else {
 		// actual data
