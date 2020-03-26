@@ -2,6 +2,9 @@
 #include "stdafx.h"
 #include "XMLapi.h"
 
+#include "cssimlog.h"
+#include "cssimlog_export.h"
+
 CSScenarioXML::CSScenarioXML(
 	const string& xml_path) : file_path_(xml_path) {
 	//already_read_publish_subscribe_xml_ = false;
@@ -13,7 +16,7 @@ bool CSScenarioXML::ReadXML(const string& scenario_full_name) {
 
 	try {
 		msg = "start parse xml:" + scenario_full_name;
-		// TODO LogSEInfo(msg);
+		LogSEInfo(msg);
 
 		rapidxml::file<> content(scenario_full_name.c_str());
 
@@ -46,21 +49,21 @@ bool CSScenarioXML::ReadXML(const string& scenario_full_name) {
 	catch (const parse_error& e) {
 		string error_info = "解析想定XML出错，";
 		error_info += e.what();
-		// TODO LogSEErr(error_info);
+		LogSEErr(error_info);
 		return false;
 	}
 	catch (const exception& e) {
 		string error_info = "解析想定XML出错，";
 		error_info += e.what();
-		// TODO LogSEErr(error_info);
+		LogSEErr(error_info);
 		return false;
 	}
 	catch (...) {
-		// TODO LogSEErr("解析想定XML出错");
+		LogSEErr("解析想定XML出错");
 		return false;
 	}
 	msg = "end parse xml:" + scenario_full_name + "successed!";
-	// TODO LogSEInfo(msg);
+	LogSEInfo(msg);
 	return true;
 
 }
@@ -114,7 +117,7 @@ bool CSScenarioXML::ParserScenarioInfo(xml_node<char>*& parent_node) {
 		return false;
 	}
 	string msg = "parse ScenarioInfo successed";
-	// TODO LogSEInfo(msg);
+	LogSEInfo(msg);
 	return true;
 }
 
@@ -138,7 +141,7 @@ bool CSScenarioXML::ParserTypeDefine(xml_node<char>*& parent_ndoe) {
 			type_define_info.type_name = att->value();
 		}
 		else {
-			// TODO LogSEErr("自定义类型名称为空");
+			LogSEErr("自定义类型名称为空");
 			continue;
 		}
 
@@ -153,7 +156,7 @@ bool CSScenarioXML::ParserTypeDefine(xml_node<char>*& parent_ndoe) {
 				param_name = att->value();
 			}
 			else {
-				// TODO LogSEErr("自定义类型-参数名称为空");
+				LogSEErr("自定义类型-参数名称为空");
 				continue;
 			}
 			//参数类型
@@ -162,7 +165,7 @@ bool CSScenarioXML::ParserTypeDefine(xml_node<char>*& parent_ndoe) {
 				param_type = att->value();
 			}
 			else {
-				// TODO LogSEErr("自定义类型-参数类型为空");
+				LogSEErr("自定义类型-参数类型为空");
 				continue;
 			}
 
@@ -173,7 +176,7 @@ bool CSScenarioXML::ParserTypeDefine(xml_node<char>*& parent_ndoe) {
 	}
 
 	string msg = "parse TypeDefine successed";
-	// TODO LogSEInfo(msg);
+	LogSEInfo(msg);
 
 	return true;
 }
@@ -198,7 +201,7 @@ bool CSScenarioXML::ParserTopicDefine(xml_node<char>*& parent_ndoe) {
 			topic_define_info.topic_name = att->value();
 		}
 		else {
-			// TODO LogSEErr("主题名称为空");
+			LogSEErr("主题名称为空");
 			continue;
 		}
 
@@ -208,7 +211,7 @@ bool CSScenarioXML::ParserTopicDefine(xml_node<char>*& parent_ndoe) {
 			topic_define_info.params[topic_define_info.topic_name] = att->value();
 		}
 		else {
-			// TODO LogSEErr("主题类型为空");
+			LogSEErr("主题类型为空");
 			continue;
 		}
 
@@ -216,7 +219,7 @@ bool CSScenarioXML::ParserTopicDefine(xml_node<char>*& parent_ndoe) {
 	}
 
 	string msg = "parse Topics successed";
-	// TODO LogSEInfo(msg);
+	LogSEInfo(msg);
 
 	return true;
 }
@@ -286,7 +289,7 @@ bool CSScenarioXML::ParserPublishSubscribe(xml_node<char>*& parent_node) {
 		}
 	}
 	string msg = "parse Models successed";
-	// TODO LogSEInfo(msg);
+	LogSEInfo(msg);
 	return true;
 }
 
