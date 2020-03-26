@@ -2,8 +2,8 @@
 <MilitaryScenario>
   <ScenarioInfo>
     <Name>测试项目</Name>
-    <Id>ZtOE0Jfu</Id>
-    <Node>SIMUengine777</Node>
+    <Id>Inka6XNh</Id>
+    <Node>insA</Node>
   </ScenarioInfo>
   <TypeDefine>
     <!-- 用户数据类型 -->
@@ -54,7 +54,9 @@
         <Topic topicName="node_ready" />
         <Topic topicName="advance_request" />
         <!-- 用户订阅 -->
-        <Topic topicName="simulation_run" />
+        <Topic topicName="topic_001" />
+        <Topic topicName="topic_002" />
+        <Topic topicName="topic_003" />
       </Subscribe>
     </Model>
     <Model name = "insA">
