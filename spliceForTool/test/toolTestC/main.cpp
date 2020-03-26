@@ -2,13 +2,8 @@
 #include <tchar.h>
 #include <Windows.h>
 #include <stdio.h>
-#include <iostream>
 
-//#include <experimental/filesystem>
-//#include <filesystem>
-
-//using namespace std;
-//namespace fs = std::experimental::filesystem::v1;
+// INSC
 
 typedef struct _UDPosition {
 	double longitude;
@@ -26,7 +21,7 @@ typedef struct _UDPosture {
 	int	phi;
 	int	psi;
 	int	gamma;
-}UDPosture;
+} UDPosture;
 
 static UDPosture posture;
 
@@ -77,8 +72,6 @@ void setToTool(double time, char* name, void* data) {
 		double d = *(double*)data;
 		printf("topic_001 : %f\n", d);
 	}
-
-	//setFinish(time);
 }
 
 void setFinish(double time) {
@@ -104,8 +97,9 @@ void endTool() {
 
 int main(int argc, char *argv[]) {
 
-	SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
+	// SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
 
+	/*
 	char path[MAX_PATH];
 	if (GetModuleFileName(NULL, path, MAX_PATH)>0)
 	{
@@ -129,32 +123,17 @@ int main(int argc, char *argv[]) {
 	std::string env("file://");
 	env.append(file_path);
 	errno_t er = _putenv_s("OSPL_URI", env.c_str());
+	*/
 
 	DWORD err = 0;
 
-	//HMODULE hInstC = LoadLibraryEx(_T("spliceForTool"), NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
-	HMODULE hInstC = LoadLibrary(_T("spliceForTool"));
+	HMODULE hInstC = LoadLibraryEx(_T("spliceForTool"), NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
+	//HMODULE hInstC = LoadLibrary(_T("spliceForTool"));
 	if (hInstC == NULL) {
 		err = GetLastError();
 		printf("load dll fail %d", err);
 		getchar();
 	}
-
-	/*
-	SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
-	auto current_path = fs::current_path();
-	auto str = current_path.generic_wstring() + std::wstring(
-	L"/external/OpenSplice/bin");
-	AddDllDirectory(str.c_str());
-	std::string file_path = current_path.generic_string();
-	file_path.append("/external/OpenSplice/etc/config/ospl.xml");
-	std::string env("file://");
-	env.append(file_path);
-	errno_t er = _putenv_s("OSPL_URI", env.c_str());
-	if (er) {
-	cout << "set dds env error, error code:" << std::to_string(er);
-	}
-	*/
 
 	startFun = (FunDLL1)GetProcAddress(hInstC, "dllStart");
 	setFun = (FunDLL2)GetProcAddress(hInstC, "dllSetValue");
@@ -168,7 +147,7 @@ int main(int argc, char *argv[]) {
 	posture.phi = 0;
 	posture.gamma = 0;
 
-	token = startFun("ZtOE0Jfu_insC.xml",
+	token = startFun("Inka6XNh_insC.xml",
 		initTool, setToTool, setFinish, endTool);
 
 	if ("" == token) {

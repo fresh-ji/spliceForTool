@@ -2,13 +2,8 @@
 #include <tchar.h>
 #include <Windows.h>
 #include <stdio.h>
-#include <iostream>
 
-//#include <experimental/filesystem>
-//#include <filesystem>
-
-//using namespace std;
-//namespace fs = std::experimental::filesystem::v1;
+//INSB
 
 typedef struct _UDPosition {
 	double longitude;
@@ -26,9 +21,9 @@ typedef struct _UDPosture {
 	int	phi;
 	int	psi;
 	int	gamma;
-}UDPosture;
+} UDPosture;
 
-static double topic_data = 0;
+static UDPosition pos;
 
 void initTool(double, double);
 void setToTool(double, char*, void*);
@@ -62,18 +57,7 @@ void initTool(double startTime, double step) {
 
 void setToTool(double time, char* name, void* data) {
 	printf("i received data at %f for %s\n", time, name);
-	if (strcmp(name, "topic_002") == 0) {
-		UDPosition* pos = (UDPosition*)data;
-		printf("info:\n");
-		printf("longitude : %f\n", pos->longitude);
-		printf("latitude : %f\n", pos->latitude);
-		printf("altitude : %f\n", pos->altitude);
-		printf("x : %f\n", pos->x);
-		printf("y : %f\n", pos->y);
-		printf("z : %f\n", pos->z);
-	}
-	else if (strcmp(name, "topic_003") == 0)
-	{
+	if (strcmp(name, "topic_003") == 0) {
 		UDPosture* pos = (UDPosture*)data;
 		printf("info:\n");
 		printf("vx : %d\n", pos->vx);
@@ -83,13 +67,17 @@ void setToTool(double time, char* name, void* data) {
 		printf("psi : %d\n", pos->psi);
 		printf("gamma : %d\n", pos->gamma);
 	}
-
-	//setFinish(time);
 }
 
 void setFinish(double time) {
-	topic_data += 1;
-	setFun("topic_001", (void*)&topic_data);
+	pos.longitude = pos.longitude + 1;
+	pos.latitude = pos.latitude + 1;
+	pos.altitude = pos.altitude + 1;
+	pos.x = pos.x + 1;
+	pos.y = pos.y + 1;
+	pos.z = pos.z + 1;
+
+	setFun("topic_002", (void*)&pos);
 	printf("i did something and go forward to %f\n", time);
 	advanceFun();
 }
@@ -102,12 +90,13 @@ void endTool() {
 
 int main(int argc, char *argv[]) {
 
-	SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
+	// SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
 
+	/*
 	char path[MAX_PATH];
 	if (GetModuleFileName(NULL, path, MAX_PATH)>0)
 	{
-		(*strrchr(path, '\\')) = '\0';//丢掉文件名，得到路径   
+		(*strrchr(path, '\\')) = '\0';//丢掉文件名，得到路径
 	}
 
 	int nLength = MultiByteToWideChar(CP_ACP, 0, path, -1, NULL, NULL);
@@ -127,11 +116,12 @@ int main(int argc, char *argv[]) {
 	std::string env("file://");
 	env.append(file_path);
 	errno_t er = _putenv_s("OSPL_URI", env.c_str());
+	*/
 
 	DWORD err = 0;
-	
-	//HMODULE hInstC = LoadLibraryEx(_T("spliceForTool"), NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
-	HMODULE hInstC = LoadLibrary(_T("spliceForTool"));
+
+	HMODULE hInstC = LoadLibraryEx(_T("spliceForTool"), NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
+	//HMODULE hInstC = LoadLibrary(_T("spliceForTool"));
 	if (hInstC == NULL) {
 		err = GetLastError();
 		printf("load dll fail %d", err);
@@ -143,7 +133,6 @@ int main(int argc, char *argv[]) {
 	advanceFun = (FunDLL3)GetProcAddress(hInstC, "dllAdvance");
 	endFun = (FunDLL4)GetProcAddress(hInstC, "dllEnd");
 
-	UDPosition pos;
 	pos.longitude = 0.0;
 	pos.latitude = 0.0;
 	pos.altitude = 0.0;
@@ -154,13 +143,13 @@ int main(int argc, char *argv[]) {
 	char topic_name2[20] = "advance_grant";
 	int time = 1;
 
-	token = startFun("ZtOE0Jfu_insA.xml",
+	token = startFun("Inka6XNh_insB.xml",
 		initTool, setToTool, setFinish, endTool);
 
-	if (strcmp(token,"") == 0) {
+	if ("" == token) {
 		printf("start wrong\n");
 	}
-	else{
+	else {
 		while (1) {
 			Sleep(30);
 			if (endFlag == 1) {
