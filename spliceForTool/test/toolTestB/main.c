@@ -3,7 +3,7 @@
 #include <Windows.h>
 #include <stdio.h>
 
-// INSC
+//INSB
 
 typedef struct _UDPosition {
 	double longitude;
@@ -23,7 +23,7 @@ typedef struct _UDPosture {
 	int	gamma;
 } UDPosture;
 
-static UDPosture posture;
+static UDPosition pos;
 
 void initTool(double, double);
 void setToTool(double, char*, void*);
@@ -57,34 +57,27 @@ void initTool(double startTime, double step) {
 
 void setToTool(double time, char* name, void* data) {
 	printf("i received data at %f for %s\n", time, name);
-	if (strcmp(name, "topic_002") == 0) {
-		UDPosition* pos = (UDPosition*)data;
+	if (strcmp(name, "topic_003") == 0) {
+		UDPosture* pos = (UDPosture*)data;
 		printf("info:\n");
-		printf("longitude : %f\n", pos->longitude);
-		printf("latitude : %f\n", pos->latitude);
-		printf("altitude : %f\n", pos->altitude);
-		printf("x : %f\n", pos->x);
-		printf("y : %f\n", pos->y);
-		printf("z : %f\n", pos->z);
-	}
-	else if (strcmp(name, "topic_001") == 0)
-	{
-		double d = *(double*)data;
-		printf("topic_001 : %f\n", d);
+		printf("vx : %d\n", pos->vx);
+		printf("vy : %d\n", pos->vy);
+		printf("vz : %d\n", pos->vz);
+		printf("phi : %d\n", pos->phi);
+		printf("psi : %d\n", pos->psi);
+		printf("gamma : %d\n", pos->gamma);
 	}
 }
 
 void setFinish(double time) {
+	pos.longitude = pos.longitude + 1;
+	pos.latitude = pos.latitude + 1;
+	pos.altitude = pos.altitude + 1;
+	pos.x = pos.x + 1;
+	pos.y = pos.y + 1;
+	pos.z = pos.z + 1;
 
-	posture.vx = posture.vx + 100;
-	posture.vy = posture.vy + 100;
-	posture.vz = posture.vz + 100;
-	posture.psi = posture.psi + 100;
-	posture.phi = posture.phi + 100;
-	posture.gamma = posture.gamma + 100;
-
-	setFun("topic_003", (void*)&posture);
-
+	setFun("topic_002", (void*)&pos);
 	printf("i did something and go forward to %f\n", time);
 	advanceFun();
 }
@@ -103,7 +96,7 @@ int main(int argc, char *argv[]) {
 	char path[MAX_PATH];
 	if (GetModuleFileName(NULL, path, MAX_PATH)>0)
 	{
-		(*strrchr(path, '\\')) = '\0';//丢掉文件名，得到路径   
+		(*strrchr(path, '\\')) = '\0';//丢掉文件名，得到路径
 	}
 
 	int nLength = MultiByteToWideChar(CP_ACP, 0, path, -1, NULL, NULL);
@@ -140,20 +133,23 @@ int main(int argc, char *argv[]) {
 	advanceFun = (FunDLL3)GetProcAddress(hInstC, "dllAdvance");
 	endFun = (FunDLL4)GetProcAddress(hInstC, "dllEnd");
 
-	posture.vx = 0;
-	posture.vy = 0;
-	posture.vz = 0;
-	posture.psi = 0;
-	posture.phi = 0;
-	posture.gamma = 0;
+	pos.longitude = 0.0;
+	pos.latitude = 0.0;
+	pos.altitude = 0.0;
+	pos.x = 0.0;
+	pos.y = 0.0;
+	pos.z = 0.0;
+	char topic_name[10] = "topic_002";
+	char topic_name2[20] = "advance_grant";
+	int time = 1;
 
-	token = startFun("Inka6XNh_insC.xml",
+	token = startFun("Inka6XNh_insB.xml",
 		initTool, setToTool, setFinish, endTool);
 
 	if ("" == token) {
 		printf("start wrong\n");
 	}
-	else{
+	else {
 		while (1) {
 			Sleep(30);
 			if (endFlag == 1) {

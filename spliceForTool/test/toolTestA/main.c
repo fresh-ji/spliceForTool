@@ -3,7 +3,7 @@
 #include <Windows.h>
 #include <stdio.h>
 
-// INSC
+// INSA
 
 typedef struct _UDPosition {
 	double longitude;
@@ -23,7 +23,7 @@ typedef struct _UDPosture {
 	int	gamma;
 } UDPosture;
 
-static UDPosture posture;
+static double topic_data = 0;
 
 void initTool(double, double);
 void setToTool(double, char*, void*);
@@ -67,24 +67,21 @@ void setToTool(double time, char* name, void* data) {
 		printf("y : %f\n", pos->y);
 		printf("z : %f\n", pos->z);
 	}
-	else if (strcmp(name, "topic_001") == 0)
-	{
-		double d = *(double*)data;
-		printf("topic_001 : %f\n", d);
+	else if (strcmp(name, "topic_003") == 0) {
+		UDPosture* pos = (UDPosture*)data;
+		printf("info:\n");
+		printf("vx : %d\n", pos->vx);
+		printf("vy : %d\n", pos->vy);
+		printf("vz : %d\n", pos->vz);
+		printf("phi : %d\n", pos->phi);
+		printf("psi : %d\n", pos->psi);
+		printf("gamma : %d\n", pos->gamma);
 	}
 }
 
 void setFinish(double time) {
-
-	posture.vx = posture.vx + 100;
-	posture.vy = posture.vy + 100;
-	posture.vz = posture.vz + 100;
-	posture.psi = posture.psi + 100;
-	posture.phi = posture.phi + 100;
-	posture.gamma = posture.gamma + 100;
-
-	setFun("topic_003", (void*)&posture);
-
+	topic_data += 1;
+	setFun("topic_001", (void*)&topic_data);
 	printf("i did something and go forward to %f\n", time);
 	advanceFun();
 }
@@ -97,22 +94,20 @@ void endTool() {
 
 int main(int argc, char *argv[]) {
 
-	// SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
+	//SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
 
 	/*
 	char path[MAX_PATH];
 	if (GetModuleFileName(NULL, path, MAX_PATH)>0)
 	{
-		(*strrchr(path, '\\')) = '\0';//丢掉文件名，得到路径   
+		(*strrchr(path, '\\')) = '\0';//丢掉文件名，得到路径
 	}
-
 	int nLength = MultiByteToWideChar(CP_ACP, 0, path, -1, NULL, NULL);
 	std::wstring wszStr_path;
 	wszStr_path.resize(nLength);
 	LPWSTR lpwszStr = new wchar_t[nLength];
 	MultiByteToWideChar(CP_ACP, 0, path, -1, lpwszStr, nLength);
 	wszStr_path = lpwszStr;
-
 	//auto current_path = fs::current_path();
 	auto str = wszStr_path + std::wstring(
 		L"/external/OpenSplice/x64/bin");
@@ -140,20 +135,24 @@ int main(int argc, char *argv[]) {
 	advanceFun = (FunDLL3)GetProcAddress(hInstC, "dllAdvance");
 	endFun = (FunDLL4)GetProcAddress(hInstC, "dllEnd");
 
-	posture.vx = 0;
-	posture.vy = 0;
-	posture.vz = 0;
-	posture.psi = 0;
-	posture.phi = 0;
-	posture.gamma = 0;
+	UDPosition pos;
+	pos.longitude = 0.0;
+	pos.latitude = 0.0;
+	pos.altitude = 0.0;
+	pos.x = 0.0;
+	pos.y = 0.0;
+	pos.z = 0.0;
+	char topic_name[10] = "topic_002";
+	char topic_name2[20] = "advance_grant";
+	int time = 1;
 
-	token = startFun("Inka6XNh_insC.xml",
+	token = startFun("Inka6XNh_insA.xml",
 		initTool, setToTool, setFinish, endTool);
 
-	if ("" == token) {
+	if (strcmp(token, "") == 0) {
 		printf("start wrong\n");
 	}
-	else{
+	else {
 		while (1) {
 			Sleep(30);
 			if (endFlag == 1) {
