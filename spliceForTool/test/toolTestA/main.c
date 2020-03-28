@@ -153,6 +153,7 @@ int main(int argc, char *argv[]) {
 		printf("start wrong\n");
 	}
 	else {
+		printf("every fine\n");
 		while (1) {
 			Sleep(30);
 			if (endFlag == 1) {

@@ -111,7 +111,7 @@ bool CSDDSService::CreateTopic(const std::string& topic_name) {
 	}
 
 	reliable_topic_qos.reliability.kind = RELIABLE_RELIABILITY_QOS;
-	reliable_topic_qos.durability.kind = TRANSIENT_DURABILITY_QOS;
+	//reliable_topic_qos.durability.kind = TRANSIENT_DURABILITY_QOS;
 	reliable_topic_qos.history.kind = KEEP_ALL_HISTORY_QOS;
 
 	status = participant_->set_default_topic_qos(reliable_topic_qos);
@@ -446,7 +446,7 @@ void CSDDSService::StartReceiveData(){
 	read_flag_ = true;
 	read_thread_ = std::thread(&CSDDSService::ReadWithWaitSet, this);
 	LogDDSInfo("start read thread successed")
-	//read_thread_.detach();
+	read_thread_.detach();
 }
 
 void CSDDSService::StopReceiveData(){
