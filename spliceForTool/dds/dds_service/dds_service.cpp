@@ -110,7 +110,7 @@ bool CSDDSService::CreateTopic(const std::string& topic_name) {
 			return false;
 	}
 
-	//reliable_topic_qos.reliability.kind = RELIABLE_RELIABILITY_QOS;
+	reliable_topic_qos.reliability.kind = RELIABLE_RELIABILITY_QOS;
 	//reliable_topic_qos.durability.kind = TRANSIENT_DURABILITY_QOS;
 	reliable_topic_qos.history.kind = KEEP_ALL_HISTORY_QOS;
 
