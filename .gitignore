@@ -156,3 +156,6 @@ $RECYCLE.BIN/
 .DS_Store
 
 build64
+build32
+build64-2013
+build32-2013

@@ -42,11 +42,11 @@ SET_TARGET_PROPERTIES(${CURRENT_PROJ_NAME} PROPERTIES FOLDER "test")
 #链接库
 TARGET_LINK_LIBRARIES(controlTest  
   cssimlog
-  simControl
-  ddskernel
-  dcpsisocpp2
+  #simControl
+  #ddskernel
+  #dcpsisocpp2
   #DemoTypes
-  csdds_msg_type
-  csdds_service
+  #csdds_msg_type
+  #csdds_service
 )
 
