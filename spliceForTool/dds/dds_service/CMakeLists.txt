@@ -26,11 +26,19 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR}
 					${CMAKE_SOURCE_DIR}/spliceForTool/dds/dds_msg_types
 					${CMAKE_SOURCE_DIR}/spliceForTool/common
 					${CMAKE_SOURCE_DIR}/spliceForTool
+					${CMAKE_SOURCE_DIR}/spliceForTool/db
+					${CMAKE_SOURCE_DIR}/spliceForTool/dds
+					
+					${CMAKE_SOURCE_DIR}/spliceForTool/external/mongo-cxx-driver-r3.4.0/include/mongocxx/v_noabi
+					${CMAKE_SOURCE_DIR}/spliceForTool/external/mongo-cxx-driver-r3.4.0/include/bsoncxx/v_noabi
+					${CMAKE_SOURCE_DIR}/spliceForTool/external/mongo-cxx-driver-r3.4.0/include
+					${CMAKE_SOURCE_DIR}/spliceForTool/external/boost-1_70/include
 )
 
 #库目录
 LINK_DIRECTORIES( ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} 
-                  ${CMAKE_SOURCE_DIR}/spliceForTool/external/OpenSplice/x64/lib 				  
+                  ${CMAKE_SOURCE_DIR}/spliceForTool/external/OpenSplice/x64/lib
+					${CMAKE_SOURCE_DIR}/spliceForTool/external/mongo-cxx-driver-r3.4.0/lib
 				)
 
 #链接库TARGET_
@@ -39,6 +47,8 @@ LINK_LIBRARIES(
    dcpssacpp.lib
    csdds_msg_type.lib
    cssimlog
+   csmongomgr
+   cssimconfig
 )				
 
 #生成库

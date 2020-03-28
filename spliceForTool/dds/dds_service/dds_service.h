@@ -12,16 +12,19 @@
 #include <thread>
 #include <atomic>
 
+//
+#include "dds_msg_struct.h"
+
 using namespace DDS;
 
-typedef struct _MsgData{
-	long subjectId;
-	std::string systemId;
-	double time;
-	std::string from;
-	std::string topicName;
-	std::string content;
-}MsgData;
+//typedef struct _MsgData{
+//	long subjectId;
+//	std::string systemId;
+//	double time;
+//	std::string from;
+//	std::string topicName;
+//	std::string content;
+//}MsgData;
 
 class CSDDS_SERVICE_EXPORT CSDDSService  {
  public:
@@ -29,6 +32,7 @@ class CSDDS_SERVICE_EXPORT CSDDSService  {
 
  public:
   bool Init(const std::string& partition_name);
+  bool InitDataBase();
 
   bool CreateParticipant(const std::string& participant_name) ;
   void DeleteParticipant();
@@ -55,6 +59,8 @@ class CSDDS_SERVICE_EXPORT CSDDSService  {
   //void SetCallBack(void *cb);
 
   void Clear();
+
+  void SetScenarioName(const std::string &scenario_name);
 
   DataReader_ptr getReader(const std::string& topic_name);
   DataWriter_ptr getWriter(const std::string& topic_name);
@@ -98,6 +104,9 @@ class CSDDS_SERVICE_EXPORT CSDDSService  {
   std::map<std::string, ReadCondition_var> conditions_;
   //std::map<std::string, WaitSet_var>waitsets_;
   //void *cb_;
+
+  bool can_record_ = false;
+  std::string scenario_name_;
 };
 
 #endif

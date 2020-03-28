@@ -31,6 +31,7 @@ INCLUDE_DIRECTORIES(
 LINK_DIRECTORIES( 
 				${CMAKE_LIBRARY_OUTPUT_DIRECTORY} 
 				${CMAKE_SOURCE_DIR}/spliceForTool/external/OpenSplice/x64/lib
+				${CMAKE_SOURCE_DIR}/spliceForTool/external/mongo-cxx-driver-r3.4.0/lib
 				)
 
 ################################################################################################${CS_BROWSER_MOC_SRCS}
