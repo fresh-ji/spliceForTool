@@ -59,6 +59,11 @@ bool CSDDSService::Init(const std::string& partition_name) {
 		return false;
 	}*/
 	newMsgWS = new WaitSet();
+
+	if (!InitDataBase()) {
+		return false;
+	}
+
 	LogDDSInfo("dds init success")
 
 		return true;
@@ -118,7 +123,7 @@ bool CSDDSService::InitDataBase() {
 
 	LogEngInfo("init database success")
 
-		return rv;
+	return rv;
 }
 
 bool CSDDSService::CreateParticipant(const std::string&
@@ -446,6 +451,7 @@ void CSDDSService::ReadWithWaitSet(){
 	while (read_flag_){
 		auto status = newMsgWS->wait(guardList, wait_timeout);
 		if (status == DDS::RETCODE_OK) {
+			std::vector<CSInsertData> topic_docs;
 			/* Walk over all guards to display information */
 			for (DDS::ULong i = 0; i < guardList.length(); i++)
 			{
@@ -463,10 +469,13 @@ void CSDDSService::ReadWithWaitSet(){
 						status = MsgReader->take_w_condition(msgList, infoSeq, LENGTH_UNLIMITED,condition.in());
 						CheckStatus(status, "WaitSetData::MsgDataReader::take_w_condition");
 
+						std::vector<CSInsertData> samples;
+
 						for (DDS::ULong j = 0; j < msgList.length(); j++)
 						{
 							if (infoSeq[j].valid_data)
 							{
+								CSInsertData sam;
 								MsgData data;
 								data.subjectId = msgList[j].subjectId;
 								data.systemId = msgList[j].systemId;
@@ -479,9 +488,17 @@ void CSDDSService::ReadWithWaitSet(){
 								{
 									cb_(data);
 								}
+								
+								if (sam.Topic2Doc(data)) {
+									samples.push_back(std::move(sam));
+								}
+								//samples.push_back(sam);
 							}
 						}
 
+						CSInsertData topic_doc;
+						topic_doc.InsertParam(std::move(topic_name), samples);
+						topic_docs.push_back(std::move(topic_doc));
 
 						if (msgList.length() > 0)
 						{
@@ -491,6 +508,13 @@ void CSDDSService::ReadWithWaitSet(){
 					}
 				}
 			} /* for */
+			static int time = 0;
+			time++;
+			CSInsertData time_doc;
+			time_doc.InsertBasicParam("time", std::to_string(time));
+			time_doc.InsertParam("data", topic_docs);
+
+			Mongo->Insert(time_doc);
 		}
 		else if (status != DDS::RETCODE_TIMEOUT) {
 			// DDS_RETCODE_TIMEOUT is considered as an error

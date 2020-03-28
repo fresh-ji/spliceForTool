@@ -99,6 +99,7 @@ bool SimControlInterface::simRun(string configName)
 
 		std::function<bool(MsgData)> cb = std::bind(&SimControlInterface::process, this, placeholders::_1);
 		inst->SetCallBack(cb);
+		inst->SetScenarioName(configName);
 
 		for (auto pubName : pubNames){
 			inst->CreateTopic(pubName);
