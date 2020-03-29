@@ -60,6 +60,11 @@ public:
 	JSONapi *p_JSONapi;
 	CSScenarioXML *p_XMLapi;
 	CSDDSService *p_ddsInst;
+
+public:
+	void matInit();
+	void matData();
+	void matFinish();
 };
 
 #endif

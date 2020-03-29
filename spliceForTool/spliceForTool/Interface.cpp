@@ -113,13 +113,13 @@ string Interface::start(string configName,
 }
 
 bool Interface::setValue(string topic_name, void* data_ptr) {
-	
+
 	string data = p_JSONapi->ConvertTypeData2Json(topic_name, data_ptr);
 	string msg;
 
 	if (!publish(topic_name, data)) {
-		 msg = systemId + " data send fail at " + to_string(currentTime);
-		 LogSEErr(msg);
+		msg = systemId + " data send fail at " + to_string(currentTime);
+		LogSEErr(msg);
 		return false;
 	}
 	msg = systemId + " data send successed at " + to_string(currentTime);
@@ -148,7 +148,7 @@ bool Interface::end() {
 bool Interface::process(const MsgData& msgdata) {
 
 #ifdef STDOUTTEST
-	
+
 	std::cout << "=======receive data:===========" << endl;
 	std::cout << "*********************" << endl;
 	std::cout << "content:" << msgdata.content << endl;
@@ -158,7 +158,7 @@ bool Interface::process(const MsgData& msgdata) {
 	std::cout << "time:" << msgdata.time << endl;
 	std::cout << "topicName:" << msgdata.topicName << endl;
 	std::cout << "*********************" << endl;
-	
+
 #endif
 
 	string msg;
@@ -178,7 +178,7 @@ bool Interface::process(const MsgData& msgdata) {
 		str = "Old Data {";
 		str = str + str_time + "} at {"
 			+ to_string(currentTime) + "}";
-		
+
 		msg = systemId + str;
 		LogSEErr(msg);
 		return false;
@@ -253,4 +253,16 @@ bool Interface::publish(string topic, string data) {
 	msgdata.topicName = topic;
 	msgdata.content = data;
 	return p_ddsInst->write(topic, msgdata);
+}
+
+void Interface::matInit() {
+	(*p_initTool)(2.0, 0.02);
+}
+
+void Interface::matData() {
+	(*p_setToTool)(5.0, "dataSample", "{\"d1\":4.4,\"d2\":6.6,\"i\":88,\"s\":\"hello world\"}");
+}
+
+void Interface::matFinish() {
+	(*p_setFinish)(3.0);
 }

@@ -37,3 +37,8 @@ extern "C" SPLICEFORTOOL_EXPORT int dllAdvance();
 * @brief       dllEnd						    œÚdll«Î«ÛΩ· ¯
 */
 extern "C" SPLICEFORTOOL_EXPORT int dllEnd();
+
+// for matlab test
+extern "C" SPLICEFORTOOL_EXPORT void matInit();
+extern "C" SPLICEFORTOOL_EXPORT void matData();
+extern "C" SPLICEFORTOOL_EXPORT void matFinish();

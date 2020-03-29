@@ -42,3 +42,15 @@ int dllEnd() {
 	}
 	return 0;
 }
+
+void matInit() {
+	inst->matInit();
+}
+
+void matData() {
+	inst->matData();
+}
+
+void matFinish() {
+	inst->matFinish();
+}
