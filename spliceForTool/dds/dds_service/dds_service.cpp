@@ -60,10 +60,6 @@ bool CSDDSService::Init(const std::string& partition_name) {
 	}*/
 	newMsgWS = new WaitSet();
 
-	if (!InitDataBase()) {
-		return false;
-	}
-
 	LogDDSInfo("dds init success")
 
 		return true;

@@ -52,12 +52,6 @@ int main(int argc, char *argv[]) {
 	//env.append(file_path);
 	//errno_t er = _putenv_s("OSPL_URI", env.c_str());
 
-	std::string file_path = path;
-	file_path.append("/external/OpenSplice/x64/etc/config/ospl.xml");
-	std::string env("file://");
-	env.append(file_path);
-	errno_t er = _putenv_s("OSPL_URI", env.c_str());
-
 	DWORD err = 0;
 
 	//HMODULE hInstC = LoadLibraryEx(_T("simControl"), NULL, LOAD_WITH_ALTERED_SEARCH_PATH);//simControl //spliceForTool
