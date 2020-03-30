@@ -11,73 +11,20 @@
 
 using namespace std;
 
-//class ReadCondHandler {
-//public:
-//	/**
-//	* @param dataState The dataState on which to filter the samples
-//	*/
-//	ReadCondHandler(dds::sub::status::DataState& dataState)
-//		: dataState(dataState) {}
-//	void operator() (const dds::sub::cond::ReadCondition& cond) {
-//		/** retrieve the DataState from the condition */
-//		dds::sub::status::DataState dataState = cond.state_filter();
-//		/** retrieve the associated reader from the condition */
-//		dds::sub::DataReader<Msg> dr = cond.data_reader();
-//
-//		dds::sub::LoanedSamples<Msg> samples = dr.select().state(dataState).take();
-//		// dds::sub::LoanedSamples<Msg> samples = dr.select().content(cond).take();
-//		// dds::sub::LoanedSamples<Msg> samples = dr.take();
-//
-//		for (dds::sub::LoanedSamples<Msg>::const_iterator sample = samples.begin();
-//			sample < samples.end(); ++sample) {
-//			if ((*sample).info().valid()) {
-//				SimControlInterface::getInstance().process(sample->data());
-//			}
-//		}
-//	}
-//private:
-//	dds::sub::status::DataState& dataState;
-//};
-
-//bool wsServe(dds::core::cond::WaitSet waitSet, string systemId) {
-//	cout << "[checked] <" << systemId << "> "
-//		<< "dds detached thread starts well" << endl;
-//	std::string msg;
-//	msg = systemId + "dds detached thread starts well";
-//	//LogDDSInfo(msg);
-//
-//	while (1) {
-//		try {
-//			waitSet.dispatch();
-//		}
-//		catch (const dds::core::TimeoutError e) {
-//			cout << "[error] <" << systemId << "> "
-//				"dds thread:" << e.what() << endl;
-//			std::string msg;
-//			msg = systemId + "dds thread:" + e.what();
-//			LogDDSErr(msg);
-//			return false;
-//		}
-//	}
-//	cout << "[checked] <" << systemId << "> "
-//		<< "dds detached thread ends" << endl;
-//	msg = systemId + "dds detached thread ends";
-//	LogDDSInfo(msg);
-//	return true;
-//}
-
 SimControlInterface::SimControlInterface() {
 	//systemRunId = org::opensplice::domain::default_id();
-
-	std::string pt("initialize_log.txt");
-	CSSimLog::Instance()->CreateLog(pt);
-	LogSEInfo("init log success");
 }
 
 
 bool SimControlInterface::simRun(string configName)
 {
 	try {
+		SetOsplEnv();
+
+		std::string pt("initialize_log.txt");
+		CSSimLog::Instance()->CreateLog(pt);
+		LogSEInfo("init log success");
+
 		// 1.Read Config
 		if (!xml_parser_.ReadXML(configName)) {
 			cout << "[error] system config fail" << endl;
@@ -244,107 +191,6 @@ bool SimControlInterface::simEnd()
 	return true;
 }
 
-//bool SimControlInterface::process(Msg messageIn) {
-//
-//	if (start_flag_ && !pause_flag_) {
-//
-//		string str;
-//		string str_time = to_string(messageIn.time());
-//		string tName = messageIn.topicName();
-//		string from = messageIn.from();
-//
-//		str = "RECEIVE <";
-//		str = str + tName + "> FROM <" + messageIn.from()
-//			+ "> AT <" + str_time + ">";
-//		cout << str << endl;
-//		LogDDSInfo(str);
-//
-//		string sName = messageIn.systemId();
-//		if (sName != systemId) {
-//			cout << "[error] <" << systemId << "> "
-//				<< "the message is not for me" << endl;
-//
-//			std::string msg;
-//			msg = systemId + "the message is not for me";
-//			LogDDSErr(str);
-//			return false;
-//		}
-//
-//		// prevent history data
-//		if ((currentTime - messageIn.time()) > 10e-5) {
-//			str = "Old Data {";
-//			str = str + str_time + "} at {"
-//				+ to_string(currentTime) + "}";
-//			cout << "[error] <" << systemId << "> "
-//				<< str << endl;
-//
-//			std::string msg;
-//			msg = systemId + str;
-//			LogDDSInfo(msg);
-//			return false;
-//		}
-//
-//		cout << "current time: <" << currentTime << "> message time: < "<< str_time << ">"<< endl;
-//
-//		if (tName == NODE_READY) {
-//			//检测各节点准备状态，发送初始化主题；
-//			ready_state_[from] = true;
-//			cout << "i have accept <" << from << "> is ready" << endl;
-//
-//			std::string msg;
-//			msg = "i have accept <" + from + "> is ready";
-//			LogDDSInfo(msg);
-//
-//			if (CheckAllNodeReadyState())
-//			{
-//				cout << "all node is ready,start init" << endl;
-//				LogDDSInfo("all node is ready,start init");
-//				publish(INITIAL_FEDERATE, "me");
-//			}
-//		}
-//		else if (tName == ADVANCE_REQUEST) {
-//			mx_.lock();
-//			advance_request_state_[from] = true;
-//			mx_.unlock();
-//			if (CheckAllNodeAdvanceRequestState())
-//			{
-//				ResetAllNodeAdvanceRequestState();
-//
-//				if (first_acquire_flag_)
-//				{
-//					cout << "all nodes are init,start run" << endl;
-//					LogDDSInfo("all nodes are init,start run");
-//
-//					publish(SIMULATION_RUN, "me");
-//					pre_time_ = std::chrono::steady_clock::now();
-//					start_time_ = std::chrono::steady_clock::now();
-//					first_acquire_flag_ = false;
-//				}
-//				else
-//				{
-//					//currentTime++;
-//					cout << "all nodes are acquire advance" << endl;
-//					LogDDSInfo("all nodes are acquire advance");
-//					publish(ADVANCE_GRANT, "me");
-//				}
-//				Sleep(10000);
-//			}
-//		}
-//		else if (tName == SIMULATION_RUN) {
-//			publish(ADVANCE_GRANT, std::to_string(tick_count_));
-//		}
-//		else {
-//			// actual data
-//	
-//		}
-//		return true;
-//	}
-//	else
-//	{
-//		return false;
-//	}
-//}
-
 bool SimControlInterface::process(MsgData msgdata) {
 
 	if (start_flag_ && !pause_flag_) {
@@ -498,83 +344,6 @@ bool SimControlInterface::process(MsgData msgdata) {
 		return false;
 	}
 }
-
-//bool SimControlInterface::startServerDDS() {
-//
-//	dds::domain::DomainParticipant dp(systemRunId);
-//
-//	dds::pub::qos::PublisherQos pubQos
-//		= dp.default_publisher_qos()
-//		<< dds::core::policy::Partition("WaitSet example");
-//	dds::pub::Publisher pub(dp, pubQos);
-//
-//	dds::sub::qos::SubscriberQos subQos
-//		= dp.default_subscriber_qos()
-//		<< dds::core::policy::Partition("WaitSet example");
-//	dds::sub::Subscriber sub(dp, subQos);
-//
-//	dds::topic::qos::TopicQos topicQos = dp.default_topic_qos();
-//
-//	for (auto n : pubNames) {
-//		dds::topic::Topic<Msg> topic(dp, (const string &)n, topicQos);
-//
-//		dds::pub::qos::DataWriterQos dwqos = topic.qos();
-//		dwqos << dds::core::policy::WriterDataLifecycle
-//			::AutoDisposeUnregisteredInstances();
-//		dds::pub::DataWriter<Msg> dw(pub, topic, dwqos);
-//		writers.insert(make_pair(n, dw));
-//	}
-//
-//	for (auto n : subNames) {
-//		dds::topic::Topic<Msg> topic(dp, (const string &)n, topicQos);
-//
-//		dds::sub::qos::DataReaderQos drqos = topic.qos();
-//		dds::sub::DataReader<Msg> dr(sub, topic, drqos);
-//		readers.insert(make_pair(n, dr));
-//
-//		dds::sub::status::DataState *newDataState
-//			= new dds::sub::status::DataState();
-//		(*newDataState) << dds::sub::status::SampleState::not_read()
-//			<< dds::sub::status::ViewState::new_view()
-//			<< dds::sub::status::InstanceState::any();
-//		ReadCondHandler *readCondHandler =
-//			new ReadCondHandler(*newDataState);
-//		dds::sub::cond::ReadCondition readCond(
-//			dr, *newDataState, *readCondHandler);
-//
-//		waitSet += readCond;
-//	}
-//	return true;
-//}
-//
-//bool SimControlInterface::publish(string topic, string data) {
-//	random_device rd;
-//	mt19937 mt(rd());
-//
-//	if (topic == "advance_grant")
-//	{
-//		//currentTime++;
-//
-//		current_time_ = std::chrono::steady_clock::now();
-//		double diff = std::chrono::duration_cast<std::chrono::milliseconds>
-//			(current_time_ - start_time_).count();
-//		currentTime = diff / 1000;
-//		tick_count_++;
-//	}
-//
-//	Msg message;
-//	message.subjectId() = mt();
-//	message.systemId() = systemId;
-//	message.from() = nodeName;
-//	message.time() = currentTime;
-//	message.topicName() = topic;
-//	message.content() = data;
-//
-//	dds::pub::DataWriter<Msg> writer = writers.at(topic);
-//	writer << message;
-//
-//	return true;
-//}
 
 string SimControlInterface::ConvertTypeData2Json(string topic_name, void* data_ptr) {
 
@@ -798,3 +567,20 @@ bool SimControlInterface::ResetAllNodeAdvanceRequestState()
 	return true;
 }
 
+bool SimControlInterface::SetOsplEnv() {
+	char path[MAX_PATH];
+	memset(path, 0, sizeof(path));
+	if (GetModuleFileName(NULL, path, MAX_PATH)>0)
+	{
+		(*strrchr(path, '\\')) = '\0';//丢掉文件名，得到路径
+	}
+
+	char ospl_file_path[MAX_PATH];
+	memset(ospl_file_path, 0, sizeof(ospl_file_path));
+	strcat(ospl_file_path, "file://");
+	strcat(ospl_file_path, path);
+	strcat(ospl_file_path, "/external/OpenSplice/x64/etc/config/ospl.xml");
+	errno_t er = _putenv_s("OSPL_URI", ospl_file_path);
+
+	return true;
+}
