@@ -5,10 +5,6 @@
 Interface::Interface() {
 	p_XMLapi = new CSScenarioXML();
 	p_JSONapi = new JSONapi(p_XMLapi);
-
-	string pt("initialize_log.txt");
-	CSSimLog::Instance()->CreateLog(pt);
-	LogSEInfo("init log success");
 }
 
 Interface::~Interface() {
@@ -22,6 +18,12 @@ Interface* Interface::Instance() {
 string Interface::start(string configName,
 	initTool p_initTool, setToTool p_setToTool,
 	setFinish p_setFinish, endTool p_endTool) {
+
+	SetOsplEnv();
+
+	string pt("initialize_log.txt");
+	CSSimLog::Instance()->CreateLog(pt);
+	LogSEInfo("init log success");
 
 	string msg;
 
@@ -228,6 +230,10 @@ bool Interface::process(const MsgData& msgdata) {
 		(*p_setFinish)(currentTime);
 		LogSEInfo("call tool finish funtion done");
 	}
+	else if (tName == SIMULATION_RUN) {
+		// TODO
+		advance();
+	}
 	else if (tName == SIMULATION_END) {
 		// TODO
 		(*p_endTool)();
@@ -253,4 +259,22 @@ bool Interface::publish(string topic, string data) {
 	msgdata.topicName = topic;
 	msgdata.content = data;
 	return p_ddsInst->write(topic, msgdata);
+}
+
+bool Interface::SetOsplEnv() {
+	char path[MAX_PATH];
+	memset(path, 0, sizeof(path));
+	if (GetModuleFileName(NULL, path, MAX_PATH)>0)
+	{
+		(*strrchr(path, '\\')) = '\0';//丢掉文件名，得到路径
+	}
+
+	char ospl_file_path[MAX_PATH];
+	memset(ospl_file_path, 0, sizeof(ospl_file_path));
+	strcat(ospl_file_path, "file://");
+	strcat(ospl_file_path, path);
+	strcat(ospl_file_path, "/external/OpenSplice/x64/etc/config/ospl.xml");
+	errno_t er = _putenv_s("OSPL_URI", ospl_file_path);
+
+	return true;
 }
