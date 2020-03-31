@@ -362,7 +362,7 @@ private:
     {
         if (msg.time - last_update_ >= cache_refresh)
         {
-            offset_minutes_ = os::utc_minutes_offset(tm_time);
+            //offset_minutes_ = os::utc_minutes_offset(tm_time);
             last_update_ = msg.time;
         }
         return offset_minutes_;

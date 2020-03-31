@@ -34,6 +34,7 @@ private:
 	bool parseConfig();
 	bool process(const MsgData&  msgdata);
 	bool publish(string, string);
+	bool SetOsplEnv();
 
 	string systemId;
 	// int systemRunId;

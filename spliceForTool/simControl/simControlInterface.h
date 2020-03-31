@@ -85,6 +85,8 @@ private:
 	//重置各节点步进请求状态
 	bool ResetAllNodeAdvanceRequestState();
 
+	bool SetOsplEnv();
+
 	// time management
 	double currentTime;
 	double step;
