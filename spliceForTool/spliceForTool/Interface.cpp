@@ -91,7 +91,7 @@ string Interface::start(string configName,
 
 		function<bool(MsgData)> cb = bind(&Interface::process, this, placeholders::_1);
 		p_ddsInst->SetCallBack(cb);
-		p_ddsInst->SetScenarioName(configName);
+		p_ddsInst->SetScenarioName(nodeName);
 		p_ddsInst->InitDataBase();
 		p_ddsInst->StartReceiveData();
 		LogSEInfo("start dds successed!");
