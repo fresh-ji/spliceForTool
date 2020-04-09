@@ -55,6 +55,13 @@ int main(int argc, char** argv) {
 
   CSDDSService *inst = CSDDSService::Instance();
   inst->Init("dds");
+  inst->CreateTopic("topic1");
+  inst->CreateWriter("topic1");
+  inst->CreateReader("topic1");
+
+  inst->CreateTopic("topic2");
+  inst->CreateWriter("topic2");
+  inst->CreateReader("topic2");
  
   inst->SetCallBack(process);
   inst->StartReceiveData();
@@ -96,9 +103,9 @@ int main(int argc, char** argv) {
   std::cout << "topicName:" << data2.topicName << endl;
 
 
-  inst->write(data);
+  inst->write("topic1",data);
   //Sleep(2000);
-  inst->write(data2);
+  inst->write("topic2",data2);
 
   /*std::vector<MsgData> receive_datas  = inst->read();
   std::cout << "=======receive data:===========" << endl;
@@ -114,5 +121,7 @@ int main(int argc, char** argv) {
   }*/
   
   getchar();
+  //inst->StopReceiveData();
+  inst->Clear();
   return 0;
 }

@@ -2,6 +2,9 @@
 #include "stdafx.h"
 #include "JSONapi.h"
 
+#include "cssimlog.h"
+#include "cssimlog_export.h"
+
 JSONapi::JSONapi(CSScenarioXML* p_xmlParser) {
 	this->p_xmlParser = p_xmlParser;
 }
@@ -17,6 +20,7 @@ string JSONapi::ConvertTypeData2Json(string topic_name, void* data_ptr) {
 	writer.StartObject();
 
 	if (data_ptr == NULL) {
+		LogSEErr("数据指针为空");
 		return  "";
 	}
 
@@ -39,6 +43,7 @@ string JSONapi::ConvertTypeData2Json(string topic_name, void* data_ptr) {
 			writer.String(data.c_str());
 		}
 		else {
+			//LogSEInfo("非基础数据类型，获取结构体定义")
 			TypeDefineInfo type_define_info =
 				p_xmlParser->GetTypeDefineInfo(param_type);
 			unordered_map<string, string> type_params =
@@ -78,6 +83,7 @@ string JSONapi::ConvertTypeData2Json(string topic_name, void* data_ptr) {
 	writer.EndObject();
 	const char* json_content = buf.GetString();
 	string str_data = json_content;
+	// LogSEInfo("struct_to_json successed:" + str_data);
 	return str_data;
 }
 
@@ -127,6 +133,7 @@ char* JSONapi::ConvertJson2TypeData(string topic_name, string data) {
 				}
 			}
 			else {
+				// LogSEInfo("非基础数据类型，获取结构体定义")
 				TypeDefineInfo type_define_info =
 					p_xmlParser->GetTypeDefineInfo(param_type);
 				unordered_map<string, string> type_params =
@@ -174,5 +181,6 @@ char* JSONapi::ConvertJson2TypeData(string topic_name, string data) {
 		// msg = "fail to parse json:" + json_content;
 		// TODO LogDDSErr(msg);
 	}
+	// LogSEInfo("json_to_struct successed");
 	return buffer;
 }

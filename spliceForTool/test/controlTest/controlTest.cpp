@@ -26,25 +26,31 @@ FunDLL4 simEndFun;
 
 int main(int argc, char *argv[]) {
 
-	SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
+	//SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
 
-	char path[MAX_PATH];
-	if (GetModuleFileName(NULL, path, MAX_PATH)>0)
-	{
-		(*strrchr(path, '\\')) = '\0';//丢掉文件名，得到路径   
-	}
+	//char path[MAX_PATH];
+	//if (GetModuleFileName(NULL, path, MAX_PATH)>0)
+	//{
+	//	(*strrchr(path, '\\')) = '\0';//丢掉文件名，得到路径   
+	//}
 
-	int nLength = MultiByteToWideChar(CP_ACP, 0, path, -1, NULL, NULL);
-	std::wstring wszStr_path;
-	wszStr_path.resize(nLength);
-	LPWSTR lpwszStr = new wchar_t[nLength];
-	MultiByteToWideChar(CP_ACP, 0, path, -1, lpwszStr, nLength);
-	wszStr_path = lpwszStr;
+	//int nLength = MultiByteToWideChar(CP_ACP, 0, path, -1, NULL, NULL);
+	//std::wstring wszStr_path;
+	//wszStr_path.resize(nLength);
+	//LPWSTR lpwszStr = new wchar_t[nLength];
+	//MultiByteToWideChar(CP_ACP, 0, path, -1, lpwszStr, nLength);
+	//wszStr_path = lpwszStr;
 
-	//auto current_path = fs::current_path();
-	auto str = wszStr_path + std::wstring(
-		L"/external/OpenSplice/x64/bin");
-	AddDllDirectory(str.c_str());
+	////auto current_path = fs::current_path();
+	//auto str = wszStr_path + std::wstring(
+	//	L"/external/OpenSplice/x64/bin");
+	//AddDllDirectory(str.c_str());
+
+	//std::string file_path = path;
+	//file_path.append("/external/OpenSplice/x64/etc/config/ospl.xml");
+	//std::string env("file://");
+	//env.append(file_path);
+	//errno_t er = _putenv_s("OSPL_URI", env.c_str());
 
 	DWORD err = 0;
 
@@ -61,7 +67,7 @@ int main(int argc, char *argv[]) {
 	simContinueFun = (FunDLL3)GetProcAddress(hInstC, "dllContinue");
 	simEndFun = (FunDLL4)GetProcAddress(hInstC, "dllEnd");
 
-	char file_name[64] = "ZtOE0Jfu.xml";
+	char file_name[64] = "Inka6XNh.xml";
 	//simRunFun(file_name);
 
 

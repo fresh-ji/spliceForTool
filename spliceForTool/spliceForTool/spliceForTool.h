@@ -6,12 +6,6 @@
 // SPLICEFORTOOL_API 函数视为是从 DLL 导入的，而此 DLL 则将用此宏定义的
 // 符号视为是被导出的。
 
-//#ifdef SPLICEFORTOOL_EXPORTS
-//#define SPLICEFORTOOL_API __declspec(dllexport)
-//#else
-//#define SPLICEFORTOOL_API __declspec(dllimport)
-//#endif
-
 #include "Interface.h"
 #include "spliceForTool_export.h"
 
@@ -32,14 +26,14 @@ extern "C" SPLICEFORTOOL_EXPORT char* dllStart(char* configName,
 * @param       [in]               name          数据名
 * @param       [in]               data          数据值
 */
-extern "C" SPLICEFORTOOL_EXPORT int dllSetValue(char* token, char* name, void* data);
+extern "C" SPLICEFORTOOL_EXPORT int dllSetValue(char* name, void* data);
 
 /**
 * @brief       dllAdvance                       向dll请求推进
 */
-extern "C" SPLICEFORTOOL_EXPORT int dllAdvance(char* token);
+extern "C" SPLICEFORTOOL_EXPORT int dllAdvance();
 
 /**
 * @brief       dllEnd						    向dll请求结束
 */
-extern "C" SPLICEFORTOOL_EXPORT int dllEnd(char* token);
+extern "C" SPLICEFORTOOL_EXPORT int dllEnd();

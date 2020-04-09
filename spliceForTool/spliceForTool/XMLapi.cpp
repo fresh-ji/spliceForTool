@@ -2,6 +2,9 @@
 #include "stdafx.h"
 #include "XMLapi.h"
 
+#include "cssimlog.h"
+#include "cssimlog_export.h"
+
 CSScenarioXML::CSScenarioXML(
 	const string& xml_path) : file_path_(xml_path) {
 	//already_read_publish_subscribe_xml_ = false;
@@ -10,68 +13,69 @@ CSScenarioXML::CSScenarioXML(
 bool CSScenarioXML::ReadXML(const string& scenario_full_name) {
 
 	string msg;
-
 	try {
-		msg = "start parse xml:" + scenario_full_name;
-		// TODO LogSEInfo(msg);
+		msg = "start parsing xml : " + scenario_full_name;
+		LogSEInfo(msg);
 
 		rapidxml::file<> content(scenario_full_name.c_str());
 
 		xml_document<> doc;
 		doc.parse<0>(content.data());
 
-		xml_node<char>* millitary_node = doc.first_node("MilitaryScenario");
+		xml_node<char>* millitary_node =
+			doc.first_node("MilitaryScenario");
 		if (!millitary_node) {
+			LogSEErr("no MilitaryScenario");
 			return false;
 		}
-
 		// 基本信息
 		if (!ParserScenarioInfo(millitary_node)) {
+			LogSEErr("ParserScenarioInfo wrong");
 			return false;
 		}
 		//自定义类型
 		if (!ParserTypeDefine(millitary_node)) {
+			LogSEErr("ParserTypeDefine wrong");
 			return false;
 		}
 		//主题
 		if (!ParserTopicDefine(millitary_node)) {
+			LogSEErr("ParserTopicDefine wrong");
 			return false;
 		}
 		//发布订阅关系
 		if (!ParserPublishSubscribe(millitary_node)) {
+			LogSEErr("ParserPublishSubscribe wrong");
 			return false;
 		}
 		return true;
 	}
 	catch (const parse_error& e) {
-		string error_info = "解析想定XML出错，";
-		error_info += e.what();
-		// TODO LogSEErr(error_info);
+		msg = "parsing xml error,";
+		msg += e.what();
+		LogSEErr(msg);
 		return false;
 	}
 	catch (const exception& e) {
-		string error_info = "解析想定XML出错，";
-		error_info += e.what();
-		// TODO LogSEErr(error_info);
+		msg = "paring xml exception,";
+		msg += e.what();
+		LogSEErr(msg);
 		return false;
 	}
 	catch (...) {
-		// TODO LogSEErr("解析想定XML出错");
+		LogSEErr("paring xml unknown wrong");
 		return false;
 	}
-	msg = "end parse xml:" + scenario_full_name + "successed!";
-	// TODO LogSEInfo(msg);
 	return true;
-
 }
 
 bool CSScenarioXML::ParserScenarioInfo(xml_node<char>*& parent_node) {
 
 	xml_node<> *info_node = parent_node->first_node("ScenarioInfo");
 	if (!info_node) {
+		LogSEErr("no ScenarioInfo");
 		return false;
 	}
-
 	xml_node<> *name_node = info_node->first_node("Name");
 	if (name_node) {
 		auto value = name_node->value();
@@ -79,13 +83,14 @@ bool CSScenarioXML::ParserScenarioInfo(xml_node<char>*& parent_node) {
 			scenario_name_ = value;
 		}
 		else {
+			LogSEErr("Name no value");
 			return false;
 		}
 	}
 	else {
+		LogSEErr("no Name");
 		return false;
 	}
-
 	xml_node<> *id_node = info_node->first_node("Id");
 	if (id_node) {
 		auto value = id_node->value();
@@ -93,13 +98,14 @@ bool CSScenarioXML::ParserScenarioInfo(xml_node<char>*& parent_node) {
 			id_ = value;
 		}
 		else {
+			LogSEErr("Id no value");
 			return false;
 		}
 	}
 	else {
+		LogSEErr("no Id");
 		return false;
 	}
-
 	xml_node<> *node_node = info_node->first_node("Node");
 	if (node_node) {
 		auto value = node_node->value();
@@ -107,14 +113,14 @@ bool CSScenarioXML::ParserScenarioInfo(xml_node<char>*& parent_node) {
 			node_ = value;
 		}
 		else {
+			LogSEErr("Node no value");
 			return false;
 		}
 	}
 	else {
+		LogSEErr("no Node");
 		return false;
 	}
-	string msg = "parse ScenarioInfo successed";
-	// TODO LogSEInfo(msg);
 	return true;
 }
 
@@ -122,9 +128,9 @@ bool CSScenarioXML::ParserTypeDefine(xml_node<char>*& parent_ndoe) {
 
 	xml_node<> *type_define_node = parent_ndoe->first_node("TypeDefine");
 	if (!type_define_node) {
+		LogSEErr("no TypeDefine");
 		return false;
 	}
-
 	xml_attribute<> *att = nullptr;
 
 	for (auto it = type_define_node->first_node("Type");
@@ -138,10 +144,9 @@ bool CSScenarioXML::ParserTypeDefine(xml_node<char>*& parent_ndoe) {
 			type_define_info.type_name = att->value();
 		}
 		else {
-			// TODO LogSEErr("自定义类型名称为空");
-			continue;
+			LogSEErr("Type-name no attribute");
+			return false;
 		}
-
 		//获取自定义类型参数
 		string param_name, param_type;
 		for (auto param = it->first_node("Parameter");
@@ -153,8 +158,8 @@ bool CSScenarioXML::ParserTypeDefine(xml_node<char>*& parent_ndoe) {
 				param_name = att->value();
 			}
 			else {
-				// TODO LogSEErr("自定义类型-参数名称为空");
-				continue;
+				LogSEErr("Type-Parameter-name no attribute");
+				return false;
 			}
 			//参数类型
 			att = param->first_attribute("type");
@@ -162,19 +167,13 @@ bool CSScenarioXML::ParserTypeDefine(xml_node<char>*& parent_ndoe) {
 				param_type = att->value();
 			}
 			else {
-				// TODO LogSEErr("自定义类型-参数类型为空");
-				continue;
+				LogSEErr("Type-Parameter-type no attribute");
+				return false;
 			}
-
 			type_define_info.params.emplace(param_name, param_type);
 		}
-
 		type_define_s_[type_define_info.type_name] = type_define_info;
 	}
-
-	string msg = "parse TypeDefine successed";
-	// TODO LogSEInfo(msg);
-
 	return true;
 }
 
@@ -182,6 +181,7 @@ bool CSScenarioXML::ParserTopicDefine(xml_node<char>*& parent_ndoe) {
 
 	xml_node<> *topics_node = parent_ndoe->first_node("Topics");
 	if (!topics_node) {
+		LogSEErr("no Topics");
 		return false;
 	}
 
@@ -191,33 +191,26 @@ bool CSScenarioXML::ParserTopicDefine(xml_node<char>*& parent_ndoe) {
 		it; it = it->next_sibling()) {
 
 		TopicDefineInfo topic_define_info;
-
 		//获取主题名称
 		att = it->first_attribute("name");
 		if (att) {
 			topic_define_info.topic_name = att->value();
 		}
 		else {
-			// TODO LogSEErr("主题名称为空");
-			continue;
+			LogSEErr("Topic-name no attribute");
+			return false;
 		}
-
 		//获取主题参数类型(主题名就是参数名，主题类型就是参数类型)
 		att = it->first_attribute("type");
 		if (att) {
 			topic_define_info.params[topic_define_info.topic_name] = att->value();
 		}
 		else {
-			// TODO LogSEErr("主题类型为空");
+			// type 有可能没有
 			continue;
 		}
-
 		topic_define_s_[topic_define_info.topic_name] = topic_define_info;
 	}
-
-	string msg = "parse Topics successed";
-	// TODO LogSEInfo(msg);
-
 	return true;
 }
 
@@ -226,6 +219,7 @@ bool CSScenarioXML::ParserPublishSubscribe(xml_node<char>*& parent_node) {
 	xml_node<> *models_node = parent_node->first_node("Models");
 
 	if (!models_node) {
+		LogSEErr("no Models");
 		return false;
 	}
 
@@ -236,7 +230,8 @@ bool CSScenarioXML::ParserPublishSubscribe(xml_node<char>*& parent_node) {
 
 		xml_attribute<> *att = it->first_attribute("name");
 		if (!att) {
-			continue;
+			LogSEErr("Model-name no attribute");
+			return false;
 		}
 
 		model_name = att->value();
@@ -252,13 +247,15 @@ bool CSScenarioXML::ParserPublishSubscribe(xml_node<char>*& parent_node) {
 
 				att = pub_topic->first_attribute("topicName");
 				if (!att) {
-					continue;
+					LogSEErr("Model-Publish-Topic-topicName no attribute");
+					return false;
 				}
 				topic_name = att->value();
 				pub_sub_item.publish.push_back(topic_name);
 			}
 		}
 		else {
+			LogSEErr("no Publish");
 			return false;
 		}
 
@@ -270,23 +267,22 @@ bool CSScenarioXML::ParserPublishSubscribe(xml_node<char>*& parent_node) {
 
 				att = sub_topic->first_attribute("topicName");
 				if (!att) {
-					continue;
+					LogSEErr("Model-Subscribe-Topic-topicName no attribute");
+					return false;
 				}
 				topic_name = att->value();
 				pub_sub_item.subscribe.push_back(topic_name);
 			}
 		}
 		else {
+			LogSEErr("no Subscribe");
 			return false;
 		}
-
 		pub_sub_[model_name] = pub_sub_item;
 		if (strcmp(ENGINENAME, model_name.c_str())) {
 			all_node_.push_back(model_name);
 		}
 	}
-	string msg = "parse Models successed";
-	// TODO LogSEInfo(msg);
 	return true;
 }
 
@@ -297,6 +293,7 @@ TopicDefineInfo CSScenarioXML::GetTopicDefineInfo(const string &topic_name) cons
 	}
 	else {
 		TopicDefineInfo tmp;
+		LogSEErr("TopicDefineInfo get none");
 		return tmp;
 	}
 }
@@ -308,6 +305,7 @@ TypeDefineInfo CSScenarioXML::GetTypeDefineInfo(const string &type_name) const {
 	}
 	else {
 		TypeDefineInfo tmp;
+		LogSEErr("TypeDefineInfo get none");
 		return tmp;
 	}
 }
@@ -319,15 +317,16 @@ PubSubItem CSScenarioXML::GetPubSub(const string &node_name) const {
 	}
 	else {
 		PubSubItem tmp;
+		LogSEErr("PubSubItem get none");
 		return tmp;
 	}
 }
 
-string CSScenarioXML::GetSystemId(){
+string CSScenarioXML::GetSystemId() {
 	return id_;
 }
 
-string CSScenarioXML::GetNodeName(){
+string CSScenarioXML::GetNodeName() {
 	return node_;
 }
 

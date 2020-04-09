@@ -1,115 +1,62 @@
 
 #include "stdafx.h"
 #include "Interface.h"
-#include <iostream>
-#include <sstream>
-
-using namespace std;
-//bool wsServe(dds::core::cond::WaitSet waitSet, string systemId) {
-//
-//#ifdef STDOUTTEST
-//	cout << "[info] <" << systemId << "> "
-//		<< "dds detached thread starts" << endl;
-//#endif
-//	string msg;
-//	msg = systemId + " dds detached thread starts";
-//	// TODO LogDDSInfo(msg);
-//	while (1) {
-//		try {
-//			waitSet.dispatch();
-//		}
-//		catch (const dds::core::TimeoutError e) {
-//
-//#ifdef STDOUTTEST
-//			cout << "[error] <" << systemId << "> "
-//				"dds thread:" << e.what() << endl;
-//#endif
-//			msg = systemId + " dds thread : " + e.what();
-//			// TODO LogDDSErr(msg);
-//			return false;
-//		}
-//		catch (runtime_error& e) {
-//
-//#ifdef STDOUTTEST
-//			cout << "[error] <" << systemId << "> "
-//				"dds thread:" << e.what() << endl;
-//#endif
-//			msg = systemId + " dds thread : " + e.what();
-//			// TODO LogDDSErr(msg);
-//			return false;
-//		}
-//		catch (exception &e) {
-//
-//#ifdef STDOUTTEST
-//			cout << "[exception] <" << systemId << "> "
-//				"dds thread:" << e.what() << endl;
-//#endif
-//			msg = systemId + " dds thread : " + e.what();
-//			// TODO LogDDSErr(msg);
-//			return false;
-//		}
-//	}
-//
-//#ifdef STDOUTTEST
-//	cout << "[info] <" << systemId << "> "
-//		<< "dds detached thread ends" << endl;
-//#endif
-//	msg = systemId + " dds detached thread ends";
-//	// TODO LogDDSInfo(msg);
-//	return true;
-//}
 
 Interface::Interface() {
-	// TODO 多实例配置
-	//systemRunId = org::opensplice::domain::default_id();
-
 	p_XMLapi = new CSScenarioXML();
 	p_JSONapi = new JSONapi(p_XMLapi);
+}
 
-	std::string pt("initialize_log.txt");
-	CSSimLog::Instance()->CreateLog(pt);
-	LogSEInfo("init log success");
+Interface::~Interface() {
+}
+
+Interface* Interface::Instance() {
+	static Interface service;
+	return &service;
 }
 
 string Interface::start(string configName,
 	initTool p_initTool, setToTool p_setToTool,
 	setFinish p_setFinish, endTool p_endTool) {
 
+	SetOsplEnv();
+
+	string pt("initialize_log.txt");
+	CSSimLog::Instance()->CreateLog(pt);
+	LogSEInfo("init log success");
+
 	string msg;
 
 	try {
 		// 1.Read Config
 		if (!p_XMLapi->ReadXML(configName)) {
-			// TODO LogDDSErr("parse xml file fail");
+			LogSEErr("parse xml file fail");
 			return "";
 		}
-
 		systemId = p_XMLapi->GetSystemId();
 		nodeName = p_XMLapi->GetNodeName();
 		PubSubItem pub_sub = p_XMLapi->GetPubSub(nodeName);
 		pubNames = pub_sub.publish;
 		subNames = pub_sub.subscribe;
 
-		//log
+		// 2.Log
 		ifstream infile;
 		infile.open("initialize_log.txt");
-		if (!infile.is_open())
-		{
-			LogDDSErr("open initialize log file fail");
+		if (!infile.is_open()) {
+			LogSEErr("open initialize log file fail");
 		}
 
-		std::string csscenario_full_logname = nodeName + ".txt";
+		string csscenario_full_logname = nodeName + ".txt";
 		ofstream outfile;
 		outfile.open(csscenario_full_logname);
-		if (!outfile.is_open())
-		{
-			std::string msg = "open" + csscenario_full_logname + "fail";
-			LogDDSErr(msg);
+		if (!outfile.is_open()) {
+			string msg = "open" + csscenario_full_logname + "fail";
+			LogSEErr(msg);
 		}
 
 		CSSimLog::Instance()->CloseLog();
 
-		std::string line;
+		string line;
 		while (getline(infile, line)) {
 			outfile << line << endl;
 		}
@@ -117,238 +64,94 @@ string Interface::start(string configName,
 		outfile.close();
 		CSSimLog::Instance()->CreateLog(csscenario_full_logname);
 		if (std::remove("initialize_log.txt") == -1) {
-			LogDDSInfo("delete initialize log fail");
+			LogSEErr("delete initialize log fail");
 		}
 
-		// 2.Parameters
+		// 3.Parameters
 		currentTime = 0.0;
 		this->p_initTool = p_initTool;
 		this->p_setToTool = p_setToTool;
 		this->p_setFinish = p_setFinish;
 		this->p_endTool = p_endTool;
+		LogSEInfo("set call back successed!");
 
-		// 3.DDS
-//		p_DDSapi = new DDSapi(this);
-//		if (!p_DDSapi->startServerDDS()) {
-//
-//#ifdef STDOUTTEST
-//			cout << "[error] <" << systemId << "> "
-//				<< "starts dds fail" << endl;
-//#endif
-//			msg = systemId + " starts dds fail";
-//			// TODO LogDDSErr(msg);
-//			return "";
-//		}
-//
-//		thread th(wsServe, p_DDSapi->waitSet, systemId);
-//		th.detach();
+		// 4.DDS
+		p_ddsInst = CSDDSService::Instance();
+		p_ddsInst->Init(systemId);
 
-		inst = CSDDSService::Instance();
-		inst->Init("dds");
+		for (auto pubName : pubNames){
+			p_ddsInst->CreateTopic(pubName);
+			p_ddsInst->CreateWriter(pubName);
+		}
 
-		std::function<bool(MsgData)> cb = std::bind(&Interface::process, this, placeholders::_1);
-		inst->SetCallBack(cb);
+		for (auto subName : subNames){
+			p_ddsInst->CreateTopic(subName);
+			p_ddsInst->CreateReader(subName);
+		}
 
-		inst->StartReceiveData();
-
-#ifdef STDOUTTEST
-		cout << "-----CONGRATULATIONS, ALMOST DONE!-----" << endl;
-#endif
+		function<bool(MsgData)> cb = bind(&Interface::process, this, placeholders::_1);
+		p_ddsInst->SetCallBack(cb);
+		p_ddsInst->StartReceiveData();
+		LogSEInfo("start dds successed!");
 		// TODO 处理
 		Sleep(1000);
-		MsgData data;
-		data.content = "me";
-		data.from = nodeName;
-		data.systemId = systemId;
-		data.time = currentTime;
-		data.topicName = NODE_READY;
-		if (inst->write(data))
-		{
+		if (publish(NODE_READY, "me")) {
 			return systemId;
 		}
 		else{
 			return "";
 		}
-
-		/*if (p_DDSapi->publish(NODE_READY, "me")) {
-			return systemId;
-		}
-		else {
-			return "";
-		}*/
 	}
 	catch (runtime_error& e) {
-
-#ifdef STDOUTTEST
-		cout << "[error] <" << systemId << "> "
-			<< "runtime:" << e.what() << endl;
-#endif
 		msg = systemId + " runtime : " + e.what();
-		// TODO LogDDSErr(msg);
+		LogSEErr(msg);
 		return "";
 	}
 	catch (exception &e) {
-
-#ifdef STDOUTTEST
-		cout << "[exception] <" << systemId << "> "
-			<< e.what() << endl;
-#endif
 		msg = systemId + " exception : " + e.what();
-		// TODO LogDDSErr(msg);
+		LogSEErr(msg);
 		return "";
 	}
 }
 
 bool Interface::setValue(string topic_name, void* data_ptr) {
+	
 	string data = p_JSONapi->ConvertTypeData2Json(topic_name, data_ptr);
+	string msg;
 
-	MsgData msgdata;
-	msgdata.content = data;
-	msgdata.from = nodeName;
-	msgdata.systemId = systemId;
-	msgdata.time = currentTime;
-	msgdata.topicName = topic_name;
-	if (!inst->write(msgdata))
-	{
-		string msg;
-		msg = systemId + " data send fail at " + to_string(currentTime);
-		// TODO LogDDSErr(msg);
+	if (!publish(topic_name, data)) {
+		 msg = systemId + " data send fail at " + to_string(currentTime);
+		 LogSEErr(msg);
 		return false;
 	}
-	
-	//if (!p_DDSapi->publish(topic_name.c_str(), data)) {
-	//	string msg;
-	//	msg = systemId + " data send fail at " + to_string(currentTime);
-	//	// TODO LogDDSErr(msg);
-	//	return false;
-	//}
-
+	msg = systemId + " data send successed at " + to_string(currentTime);
+	// LogSEInfo(msg);
 	return true;
 }
 
 bool Interface::advance() {
-	MsgData msgdata;
-	msgdata.content = currentTime;
-	msgdata.from = nodeName;
-	msgdata.systemId = systemId;
-	msgdata.time = currentTime;
-	msgdata.topicName = ADVANCE_REQUEST;
-
-	if (!inst->write(msgdata))
-	{
-		string msg;
+	string msg;
+	if (!publish(ADVANCE_REQUEST, to_string(currentTime))) {
 		msg = systemId + " advance send fail at " + to_string(currentTime);
-		// TODO LogDDSErr(msg);
+		LogDDSErr(msg);
 		return false;
 	}
-
-	//if (!p_DDSapi->publish(ADVANCE_REQUEST, to_string(currentTime))) {
-	//	string msg;
-	//	msg = systemId + " advance send fail at " + to_string(currentTime);
-	//	// TODO LogDDSErr(msg);
-	//	return false;
-	//}
-#ifdef STDOUTTEST
-	cout << "<" << systemId << "> advance sent at "
-		<< to_string(currentTime) << endl;
-#endif
+	msg = systemId + " advance send successed at " + to_string(currentTime);
+	// LogSEInfo(msg);
 	return true;
 }
 
 bool Interface::end() {
-	// TODO
+	p_ddsInst->StopReceiveData();
+	LogSEInfo("end tool");
 	return true;
 }
 
-//bool Interface::process(Msg messageIn) {
-//
-//	string str;
-//	string str_time = to_string(messageIn.time());
-//	string tName = messageIn.topicName();
-//
-//#ifdef STDOUTTEST
-//	str = "RECEIVE <";
-//	str = str + tName + "> FROM <" + messageIn.from()
-//		+ "> AT <" + str_time + ">";
-//	cout << str << endl;
-//#endif
-//
-//	string sName = messageIn.systemId();
-//	if (sName != systemId) {
-//		string msg;
-//		msg = systemId + " the message is not for me";
-//		// TODO LogDDSInfo(msg);
-//		return false;
-//	}
-//
-//	// prevent history data
-//	if ((currentTime - messageIn.time()) > 10e-5) {
-//		str = "Old Data {";
-//		str = str + str_time + "} at {"
-//			+ to_string(currentTime) + "}";
-//		string msg;
-//		msg = systemId + str;
-//		// TODO LogDDSInfo(msg);
-//		return false;
-//	}
-//
-//	if (tName == ACQUIRE_READY_STATE) {
-//		p_DDSapi->publish(NODE_READY, "me");
-//	}
-//	else if (tName == INITIAL_FEDERATE) {
-//		currentTime = messageIn.time();
-//
-//		stringstream ss;
-//		ss << messageIn.content();
-//		ss >> step;
-//
-//		(*p_initTool)(currentTime, step);
-//	}
-//	else if (tName == ADVANCE_GRANT) {
-//		map<string, string> tempMap = dataMap;
-//		dataMap = backupDataMap;
-//		backupDataMap.clear();
-//
-//		map<string, string>::iterator iter;
-//		iter = tempMap.begin();
-//		while (iter != tempMap.end()) {
-//			string key = iter->first;
-//			char *cstr = new char[key.length() + 1];
-//			strcpy(cstr, key.c_str());
-//			string value = iter->second;
-//			char *cstr2 = new char[value.length() + 1];
-//			strcpy(cstr2, value.c_str());
-//
-//			char* datac = p_JSONapi->ConvertJson2TypeData(key, value);
-//
-//			(*p_setToTool)(currentTime, cstr, (void*)datac);
-//			delete[] cstr;
-//			delete[] cstr2;
-//			iter++;
-//		}
-//		currentTime = messageIn.time();
-//		(*p_setFinish)(currentTime);
-//	}
-//	else if (tName == SIMULATION_END) {
-//		// TODO
-//		(*p_endTool)();
-//	}
-//	else {
-//		// actual data
-//		if (abs(messageIn.time() - currentTime) < 10e-5) {
-//			dataMap.insert(make_pair(messageIn.topicName(), messageIn.content()));
-//		}
-//		else {
-//			backupDataMap.insert(make_pair(messageIn.topicName(), messageIn.content()));
-//		}
-//	}
-//	return true;
-//}
+bool Interface::process(const MsgData& msgdata) {
 
-
-bool Interface::process(MsgData msgdata)
-{
-	/*std::cout << "=======receive data:===========" << endl;
+#ifdef STDOUTTEST
+	
+	std::cout << "=======receive data:===========" << endl;
 	std::cout << "*********************" << endl;
 	std::cout << "content:" << msgdata.content << endl;
 	std::cout << "from:" << msgdata.from << endl;
@@ -356,23 +159,19 @@ bool Interface::process(MsgData msgdata)
 	std::cout << "systemId:" << msgdata.systemId << endl;
 	std::cout << "time:" << msgdata.time << endl;
 	std::cout << "topicName:" << msgdata.topicName << endl;
-	std::cout << "*********************" << endl;*/
+	std::cout << "*********************" << endl;
+	
+#endif
 
+	string msg;
 	string str;
 	string str_time = to_string(msgdata.time);
 	string tName = msgdata.topicName;
 
-#ifdef STDOUTTEST
-	str = "RECEIVE <";
-	str = str + tName + "> FROM <" + msgdata.from + "> AT <" + str_time + ">";
-	cout << str << endl;
-#endif
-
 	string sName = msgdata.systemId;
 	if (sName != systemId) {
-		string msg;
 		msg = systemId + " the message is not for me";
-		// TODO LogDDSInfo(msg);
+		LogSEErr(msg);
 		return false;
 	}
 
@@ -381,37 +180,29 @@ bool Interface::process(MsgData msgdata)
 		str = "Old Data {";
 		str = str + str_time + "} at {"
 			+ to_string(currentTime) + "}";
-		string msg;
+		
 		msg = systemId + str;
-		// TODO LogDDSInfo(msg);
+		LogSEErr(msg);
 		return false;
 	}
 
 	if (tName == ACQUIRE_READY_STATE) {
-		MsgData msgdata;
-		msgdata.content = to_string(currentTime);
-		msgdata.from = nodeName;
-		msgdata.systemId = systemId;
-		msgdata.time = currentTime;
-		msgdata.topicName = NODE_READY;
-		if (!inst->write(msgdata))
-		{
-			string msg;
+		if (!publish(NODE_READY, to_string(currentTime))) {
 			msg = systemId + " data send fail at " + to_string(currentTime);
-			// TODO LogDDSErr(msg);
+			LogSEErr(msg);
 			return false;
 		}
-
-		//p_DDSapi->publish(NODE_READY, "me");
+		LogSEInfo("publish node ready");
 	}
 	else if (tName == INITIAL_FEDERATE) {
 		currentTime = msgdata.time;
-		
+
 		stringstream ss;
 		ss << msgdata.content;
 		ss >> step;
 
 		(*p_initTool)(currentTime, step);
+		LogSEInfo("init tool");
 	}
 	else if (tName == ADVANCE_GRANT) {
 		map<string, string> tempMap = dataMap;
@@ -437,10 +228,16 @@ bool Interface::process(MsgData msgdata)
 		}
 		currentTime = msgdata.time;
 		(*p_setFinish)(currentTime);
+		// LogSEInfo("call tool finish funtion done");
+	}
+	else if (tName == SIMULATION_RUN) {
+		// TODO
+		advance();
 	}
 	else if (tName == SIMULATION_END) {
 		// TODO
 		(*p_endTool)();
+		LogSEInfo("call end interface");
 	}
 	else {
 		// actual data
@@ -451,5 +248,33 @@ bool Interface::process(MsgData msgdata)
 			backupDataMap.insert(make_pair(msgdata.topicName, msgdata.content));
 		}
 	}
+	return true;
+}
+
+bool Interface::publish(string topic, string data) {
+	MsgData msgdata;
+	msgdata.from = nodeName;
+	msgdata.systemId = systemId;
+	msgdata.time = currentTime;
+	msgdata.topicName = topic;
+	msgdata.content = data;
+	return p_ddsInst->write(topic, msgdata);
+}
+
+bool Interface::SetOsplEnv() {
+	char path[MAX_PATH];
+	memset(path, 0, sizeof(path));
+	if (GetModuleFileName(NULL, path, MAX_PATH)>0)
+	{
+		(*strrchr(path, '\\')) = '\0';//丢掉文件名，得到路径
+	}
+
+	char ospl_file_path[MAX_PATH];
+	memset(ospl_file_path, 0, sizeof(ospl_file_path));
+	strcat(ospl_file_path, "file://");
+	strcat(ospl_file_path, path);
+	strcat(ospl_file_path, "/external/OpenSplice/etc/config/ospl.xml");
+	errno_t er = _putenv_s("OSPL_URI", ospl_file_path);
+
 	return true;
 }
