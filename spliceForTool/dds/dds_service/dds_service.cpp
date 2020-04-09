@@ -394,7 +394,7 @@ void CSDDSService::ReadWithWaitSet(){
 					if (guardList[i].in() == condition.in())
 					{
 						/* The newMsg ReadCondition contains data */
-						LogDDSInfo("receive data，topic_name:" + topic_name);
+						// LogDDSInfo("receive data，topic_name:" + topic_name);
 						auto reader = readers_[topic_name];
 						MsgDataReader_var MsgReader = MsgDataReader::_narrow(reader.in());
 						CheckHandle(MsgReader.in(), "MsgDataReader::_narrow");
