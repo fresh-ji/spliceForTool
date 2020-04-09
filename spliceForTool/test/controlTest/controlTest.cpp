@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
 	simContinueFun = (FunDLL3)GetProcAddress(hInstC, "dllContinue");
 	simEndFun = (FunDLL4)GetProcAddress(hInstC, "dllEnd");
 
-	char file_name[64] = "Inka6XNh.xml";
+	char file_name[64] = "Gr342ttL.xml";
 	//simRunFun(file_name);
 
 
