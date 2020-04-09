@@ -1,10 +1,15 @@
 ﻿// DDSService.cpp : 定义 DLL 应用程序的导出函数。
 //
 
+#include <chrono>
+#include <ctime>
 #include <thread>
 
 #include "dds_service.h"
 #include "check_status.h"
+
+#include "csmongomgr/csmongomgr.h"
+#include "cssimconfig/cssimconfig.h"
 
 //msg_type
 #include "ccpp_WaitSetData.h"
@@ -54,9 +59,67 @@ bool CSDDSService::Init(const std::string& partition_name) {
 		return false;
 	}*/
 	newMsgWS = new WaitSet();
+
 	LogDDSInfo("dds init success")
 
 		return true;
+}
+
+std::string TimePointToString(std::chrono::time_point<std::chrono::system_clock>
+	time_point) {
+	std::time_t t = std::chrono::system_clock::to_time_t(time_point);
+	std::tm tm2;
+	localtime_s(&tm2, &t);
+	char buf[100] = { 0 };
+	std::strftime(buf, sizeof(buf), "%Y%m%d%H%M%S", &tm2);
+	std::string str = buf;
+	return std::move(str);
+}
+
+bool CSDDSService::InitDataBase() {
+
+	bool rv = false;
+	std::string url("mongodb://");
+	auto db_config = CSSimConfig::Instance().GetConfig("MongDBConfig");
+	if (db_config.size() > 0) {
+		auto pip = db_config.find("ip_address");
+		if (pip != db_config.end() && !pip->second.empty()) {
+			url.append(pip->second);
+		}
+		else {
+			url.append("127.0.0.1");
+		}
+
+		url.append(":");
+
+		auto pport = db_config.find("port");
+		if (pport != db_config.end() && !pport->second.empty()) {
+			url.append(pport->second);
+		}
+		else {
+			url.append("27017");
+		}
+	}
+	else {
+		url = "mongodb://localhost:27017";
+	}
+
+	rv = Mongo->ConnectDB(url);
+	if (!rv) {
+		LogEngInfo("connect mongo db failed")
+			return rv;
+	}
+
+	std::string table_name;
+	auto current_time = std::chrono::system_clock::now();
+	table_name = scenario_name_ + TimePointToString(std::chrono::system_clock::now());
+
+	rv = Mongo->OpenDB("scenario", table_name);
+	can_record_ = rv;
+
+	LogEngInfo("init database success")
+
+	return rv;
 }
 
 bool CSDDSService::CreateParticipant(const std::string&
@@ -384,6 +447,7 @@ void CSDDSService::ReadWithWaitSet(){
 	while (read_flag_){
 		auto status = newMsgWS->wait(guardList, wait_timeout);
 		if (status == DDS::RETCODE_OK) {
+			std::vector<CSInsertData> topic_docs;
 			/* Walk over all guards to display information */
 			for (DDS::ULong i = 0; i < guardList.length(); i++)
 			{
@@ -401,10 +465,13 @@ void CSDDSService::ReadWithWaitSet(){
 						status = MsgReader->take_w_condition(msgList, infoSeq, LENGTH_UNLIMITED,condition.in());
 						CheckStatus(status, "WaitSetData::MsgDataReader::take_w_condition");
 
+						std::vector<CSInsertData> samples;
+
 						for (DDS::ULong j = 0; j < msgList.length(); j++)
 						{
 							if (infoSeq[j].valid_data)
 							{
+								CSInsertData sam;
 								MsgData data;
 								data.subjectId = msgList[j].subjectId;
 								data.systemId = msgList[j].systemId;
@@ -417,9 +484,17 @@ void CSDDSService::ReadWithWaitSet(){
 								{
 									cb_(data);
 								}
+								
+								if (sam.Topic2Doc(data)) {
+									samples.push_back(std::move(sam));
+								}
+								//samples.push_back(sam);
 							}
 						}
 
+						CSInsertData topic_doc;
+						topic_doc.InsertParam(std::move(topic_name), samples);
+						topic_docs.push_back(std::move(topic_doc));
 
 						if (msgList.length() > 0)
 						{
@@ -429,6 +504,13 @@ void CSDDSService::ReadWithWaitSet(){
 					}
 				}
 			} /* for */
+			static int time = 0;
+			time++;
+			CSInsertData time_doc;
+			time_doc.InsertBasicParam("time", std::to_string(time));
+			time_doc.InsertParam("data", topic_docs);
+
+			Mongo->Insert(time_doc);
 		}
 		else if (status != DDS::RETCODE_TIMEOUT) {
 			// DDS_RETCODE_TIMEOUT is considered as an error
@@ -512,6 +594,10 @@ void CSDDSService::Clear(){
 	memset(&wait_timeout, 0,sizeof(wait_timeout));
 
 	LogDDSInfo("opensplice clear")
+}
+
+void CSDDSService::SetScenarioName(const std::string &scenario_name){
+	scenario_name_ = scenario_name;
 }
 
 DataReader_ptr CSDDSService::getReader(const std::string& topic_name)

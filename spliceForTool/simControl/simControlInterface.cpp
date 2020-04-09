@@ -99,6 +99,8 @@ bool SimControlInterface::simRun(string configName)
 
 		std::function<bool(MsgData)> cb = std::bind(&SimControlInterface::process, this, placeholders::_1);
 		inst->SetCallBack(cb);
+		inst->SetScenarioName(nodeName);
+		inst->InitDataBase();
 
 		for (auto pubName : pubNames){
 			inst->CreateTopic(pubName);
@@ -579,7 +581,7 @@ bool SimControlInterface::SetOsplEnv() {
 	memset(ospl_file_path, 0, sizeof(ospl_file_path));
 	strcat(ospl_file_path, "file://");
 	strcat(ospl_file_path, path);
-	strcat(ospl_file_path, "/external/OpenSplice/x64/etc/config/ospl.xml");
+	strcat(ospl_file_path, "/external/OpenSplice/etc/config/ospl.xml");
 	errno_t er = _putenv_s("OSPL_URI", ospl_file_path);
 
 	return true;
