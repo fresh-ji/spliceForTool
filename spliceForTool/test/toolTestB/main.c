@@ -90,34 +90,6 @@ void endTool() {
 
 int main(int argc, char *argv[]) {
 
-	// SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
-
-	/*
-	char path[MAX_PATH];
-	if (GetModuleFileName(NULL, path, MAX_PATH)>0)
-	{
-		(*strrchr(path, '\\')) = '\0';//丢掉文件名，得到路径
-	}
-
-	int nLength = MultiByteToWideChar(CP_ACP, 0, path, -1, NULL, NULL);
-	std::wstring wszStr_path;
-	wszStr_path.resize(nLength);
-	LPWSTR lpwszStr = new wchar_t[nLength];
-	MultiByteToWideChar(CP_ACP, 0, path, -1, lpwszStr, nLength);
-	wszStr_path = lpwszStr;
-
-	//auto current_path = fs::current_path();
-	auto str = wszStr_path + std::wstring(
-		L"/external/OpenSplice/x64/bin");
-	AddDllDirectory(str.c_str());
-
-	std::string file_path = path;
-	file_path.append("/external/OpenSplice/x64/etc/config/ospl.xml");
-	std::string env("file://");
-	env.append(file_path);
-	errno_t er = _putenv_s("OSPL_URI", env.c_str());
-	*/
-
 	DWORD err = 0;
 
 	HMODULE hInstC = LoadLibraryEx(_T("spliceForTool"), NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
@@ -143,14 +115,14 @@ int main(int argc, char *argv[]) {
 	char topic_name2[20] = "advance_grant";
 	int time = 1;
 
-	token = startFun("Inka6XNh_insB.xml",
+	token = startFun("Gr342ttL_insB.xml",
 		initTool, setToTool, setFinish, endTool);
 
 	if ("" == token) {
 		printf("start wrong\n");
 	}
 	else {
-		printf("every fine\n");
+		printf("everything fine\n");
 		while (1) {
 			Sleep(30);
 			if (endFlag == 1) {

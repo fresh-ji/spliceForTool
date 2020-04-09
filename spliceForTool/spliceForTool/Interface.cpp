@@ -125,7 +125,7 @@ bool Interface::setValue(string topic_name, void* data_ptr) {
 		return false;
 	}
 	msg = systemId + " data send successed at " + to_string(currentTime);
-	LogSEInfo(msg);
+	// LogSEInfo(msg);
 	return true;
 }
 
@@ -137,7 +137,7 @@ bool Interface::advance() {
 		return false;
 	}
 	msg = systemId + " advance send successed at " + to_string(currentTime);
-	LogSEInfo(msg);
+	// LogSEInfo(msg);
 	return true;
 }
 
@@ -228,7 +228,7 @@ bool Interface::process(const MsgData& msgdata) {
 		}
 		currentTime = msgdata.time;
 		(*p_setFinish)(currentTime);
-		LogSEInfo("call tool finish funtion done");
+		// LogSEInfo("call tool finish funtion done");
 	}
 	else if (tName == SIMULATION_RUN) {
 		// TODO
@@ -273,7 +273,7 @@ bool Interface::SetOsplEnv() {
 	memset(ospl_file_path, 0, sizeof(ospl_file_path));
 	strcat(ospl_file_path, "file://");
 	strcat(ospl_file_path, path);
-	strcat(ospl_file_path, "/external/OpenSplice/x64/etc/config/ospl.xml");
+	strcat(ospl_file_path, "/external/OpenSplice/etc/config/ospl.xml");
 	errno_t er = _putenv_s("OSPL_URI", ospl_file_path);
 
 	return true;
