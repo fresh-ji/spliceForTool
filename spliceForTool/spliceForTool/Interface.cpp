@@ -145,6 +145,7 @@ bool Interface::advance() {
 
 bool Interface::end() {
 	p_ddsInst->StopReceiveData();
+	CSSimLog::Instance()->CloseLog();
 	LogSEInfo("end tool");
 	return true;
 }
