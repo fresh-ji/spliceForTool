@@ -49,6 +49,9 @@ FunDLL3 advanceFun;
 // 4
 typedef int(*FunDLL4)();
 FunDLL4 endFun;
+// 5
+typedef int(*FunDLL5)();
+FunDLL5 stopDDSFun;
 
 void initTool(double startTime, double step) {
 	printf("i should start at %f and step is %f\n", startTime, step);
@@ -104,6 +107,7 @@ int main(int argc, char *argv[]) {
 	setFun = (FunDLL2)GetProcAddress(hInstC, "dllSetValue");
 	advanceFun = (FunDLL3)GetProcAddress(hInstC, "dllAdvance");
 	endFun = (FunDLL4)GetProcAddress(hInstC, "dllEnd");
+	stopDDSFun = (FunDLL5)GetProcAddress(hInstC, "dllStopDDS");
 
 	pos.longitude = 0.0;
 	pos.latitude = 0.0;
@@ -118,7 +122,7 @@ int main(int argc, char *argv[]) {
 	token = startFun("Gr342ttL_insB.xml",
 		initTool, setToTool, setFinish, endTool);
 
-	if ("" == token) {
+	if (strcmp(token, "") == 0) {
 		printf("start wrong\n");
 	}
 	else {
@@ -126,7 +130,27 @@ int main(int argc, char *argv[]) {
 		while (1) {
 			Sleep(30);
 			if (endFlag == 1) {
-				FreeLibrary(hInstC);
+				endFlag = 0;
+				//FreeLibrary(hInstC);
+				break;
+			}
+		}
+	}
+	stopDDSFun();
+	Sleep(1000);
+	token = startFun("Gr342ttL_insB.xml",
+		initTool, setToTool, setFinish, endTool);
+
+	if (strcmp(token, "") == 0) {
+		printf("start wrong\n");
+	}
+	else {
+		printf("everything fine\n");
+		while (1) {
+			Sleep(30);
+			if (endFlag == 1) {
+				endFlag = 0;
+				//FreeLibrary(hInstC);
 				break;
 			}
 		}

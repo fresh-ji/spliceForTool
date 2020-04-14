@@ -37,3 +37,5 @@ extern "C" SPLICEFORTOOL_EXPORT int dllAdvance();
 * @brief       dllEnd						    œÚdll«Î«ÛΩ· ¯
 */
 extern "C" SPLICEFORTOOL_EXPORT int dllEnd();
+
+extern "C" SPLICEFORTOOL_EXPORT int dllStopDDS();

@@ -150,6 +150,11 @@ bool Interface::end() {
 	return true;
 }
 
+bool Interface::stopDDS() {
+	p_ddsInst->Clear();
+	return true;
+}
+
 bool Interface::process(const MsgData& msgdata) {
 
 #ifdef STDOUTTEST

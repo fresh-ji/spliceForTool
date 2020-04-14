@@ -528,7 +528,7 @@ void CSDDSService::StartReceiveData(){
 	read_flag_ = true;
 	read_thread_ = std::thread(&CSDDSService::ReadWithWaitSet, this);
 	LogDDSInfo("start read thread successed")
-	read_thread_.detach();
+	//read_thread_.detach();
 }
 
 void CSDDSService::StopReceiveData(){
@@ -557,7 +557,7 @@ void CSDDSService::Clear(){
 	{
 		int i = 0;
 	}
-	
+	read_thread_.~thread();
 	LogDDSInfo("stop read thread done")
 
 	ReturnCode_t rv = 0;

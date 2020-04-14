@@ -42,3 +42,10 @@ int dllEnd() {
 	}
 	return 0;
 }
+
+int dllStopDDS(){
+	if (inst) {
+		return (inst->stopDDS() ? 1 : 0);
+	}
+	return 0;
+}

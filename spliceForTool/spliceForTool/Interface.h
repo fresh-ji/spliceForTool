@@ -24,6 +24,7 @@ public:
 	bool setValue(string name, void* data);
 	bool advance();
 	bool end();
+	bool stopDDS();
 
 	~Interface();
 	Interface(const Interface&) = delete;
