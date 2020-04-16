@@ -299,7 +299,7 @@ bool SimControlInterface::process(MsgData msgdata) {
 					tick_count_++;
 
 					MsgData data;
-					if(currentTime > 200){
+					if(currentTime > 20){
 						data.content = "me";
 						data.from = nodeName;
 						data.systemId = systemId;

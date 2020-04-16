@@ -1,6 +1,8 @@
 
 #include "stdafx.h"
 #include "Interface.h"
+#include <chrono>
+#include <ctime>
 
 Interface::Interface() {
 	p_XMLapi = new CSScenarioXML();
@@ -13,6 +15,17 @@ Interface::~Interface() {
 Interface* Interface::Instance() {
 	static Interface service;
 	return &service;
+}
+
+std::string TimePointToString(std::chrono::time_point<std::chrono::system_clock>
+	time_point) {
+	std::time_t t = std::chrono::system_clock::to_time_t(time_point);
+	std::tm tm2;
+	localtime_s(&tm2, &t);
+	char buf[100] = { 0 };
+	std::strftime(buf, sizeof(buf), "%Y%m%d%H%M%S", &tm2);
+	std::string str = buf;
+	return std::move(str);
 }
 
 string Interface::start(string configName,
@@ -46,7 +59,7 @@ string Interface::start(string configName,
 			LogSEErr("open initialize log file fail");
 		}
 
-		string csscenario_full_logname = nodeName + ".txt";
+		string csscenario_full_logname = nodeName + TimePointToString(std::chrono::system_clock::now()) + ".txt";
 		ofstream outfile;
 		outfile.open(csscenario_full_logname);
 		if (!outfile.is_open()) {
@@ -146,6 +159,13 @@ bool Interface::advance() {
 bool Interface::end() {
 	p_ddsInst->StopReceiveData();
 	LogSEInfo("end tool");
+	return true;
+}
+
+bool Interface::stopDDS() {
+	p_ddsInst->Clear();
+	LogSEInfo("清理dds完成");
+	CSSimLog::Instance()->CloseLog();
 	return true;
 }
 

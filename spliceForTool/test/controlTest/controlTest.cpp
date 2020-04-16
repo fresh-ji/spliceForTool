@@ -82,7 +82,7 @@ int main(int argc, char *argv[]) {
 
 		if (index == '1') {
 			simRunFun(file_name);
-			std::this_thread::sleep_for(std::chrono::seconds(200000));
+			std::this_thread::sleep_for(std::chrono::seconds(100));
 			break;
 		}
 	}
