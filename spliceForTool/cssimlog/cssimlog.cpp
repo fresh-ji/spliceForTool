@@ -1,8 +1,6 @@
 ﻿// cssimlog.cpp : 定义 DLL 应用程序的导出函数。
 //
 
-//#include "stdafx.h"
-
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/async.h"
