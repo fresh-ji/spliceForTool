@@ -8,10 +8,10 @@
 #else
 #  ifndef CSSIMLOG_EXPORT
 #    ifdef cssimlog_EXPORTS
-        /* We are building this library */
+/* We are building this library */
 #      define CSSIMLOG_EXPORT __declspec(dllexport)
 #    else
-        /* We are using this library */
+/* We are using this library */
 #      define CSSIMLOG_EXPORT __declspec(dllimport)
 #    endif
 #  endif

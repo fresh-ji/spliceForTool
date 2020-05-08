@@ -15,7 +15,6 @@ bool CSScenarioXML::ReadXML(const string& scenario_full_name) {
 	string msg;
 	try {
 		msg = "start parsing xml : " + scenario_full_name;
-		LogSEInfo(msg);
 
 		rapidxml::file<> content(scenario_full_name.c_str());
 
@@ -25,27 +24,27 @@ bool CSScenarioXML::ReadXML(const string& scenario_full_name) {
 		xml_node<char>* millitary_node =
 			doc.first_node("MilitaryScenario");
 		if (!millitary_node) {
-			LogSEErr("no MilitaryScenario");
+			LogDDSErr("no MilitaryScenario");
 			return false;
 		}
 		// 基本信息
 		if (!ParserScenarioInfo(millitary_node)) {
-			LogSEErr("ParserScenarioInfo wrong");
+			LogDDSErr("ParserScenarioInfo wrong");
 			return false;
 		}
 		//自定义类型
 		if (!ParserTypeDefine(millitary_node)) {
-			LogSEErr("ParserTypeDefine wrong");
+			LogDDSErr("ParserTypeDefine wrong");
 			return false;
 		}
 		//主题
 		if (!ParserTopicDefine(millitary_node)) {
-			LogSEErr("ParserTopicDefine wrong");
+			LogDDSErr("ParserTopicDefine wrong");
 			return false;
 		}
 		//发布订阅关系
 		if (!ParserPublishSubscribe(millitary_node)) {
-			LogSEErr("ParserPublishSubscribe wrong");
+			LogDDSErr("ParserPublishSubscribe wrong");
 			return false;
 		}
 		return true;
@@ -53,17 +52,17 @@ bool CSScenarioXML::ReadXML(const string& scenario_full_name) {
 	catch (const parse_error& e) {
 		msg = "parsing xml error,";
 		msg += e.what();
-		LogSEErr(msg);
+		LogDDSErr(msg);
 		return false;
 	}
 	catch (const exception& e) {
 		msg = "paring xml exception,";
 		msg += e.what();
-		LogSEErr(msg);
+		LogDDSErr(msg);
 		return false;
 	}
 	catch (...) {
-		LogSEErr("paring xml unknown wrong");
+		LogDDSErr("paring xml unknown wrong");
 		return false;
 	}
 	return true;
@@ -73,7 +72,7 @@ bool CSScenarioXML::ParserScenarioInfo(xml_node<char>*& parent_node) {
 
 	xml_node<> *info_node = parent_node->first_node("ScenarioInfo");
 	if (!info_node) {
-		LogSEErr("no ScenarioInfo");
+		LogDDSErr("no ScenarioInfo");
 		return false;
 	}
 	xml_node<> *name_node = info_node->first_node("Name");
@@ -83,12 +82,12 @@ bool CSScenarioXML::ParserScenarioInfo(xml_node<char>*& parent_node) {
 			scenario_name_ = value;
 		}
 		else {
-			LogSEErr("Name no value");
+			LogDDSErr("Name no value");
 			return false;
 		}
 	}
 	else {
-		LogSEErr("no Name");
+		LogDDSErr("no Name");
 		return false;
 	}
 	xml_node<> *id_node = info_node->first_node("Id");
@@ -98,12 +97,12 @@ bool CSScenarioXML::ParserScenarioInfo(xml_node<char>*& parent_node) {
 			id_ = value;
 		}
 		else {
-			LogSEErr("Id no value");
+			LogDDSErr("Id no value");
 			return false;
 		}
 	}
 	else {
-		LogSEErr("no Id");
+		LogDDSErr("no Id");
 		return false;
 	}
 	xml_node<> *node_node = info_node->first_node("Node");
@@ -113,12 +112,12 @@ bool CSScenarioXML::ParserScenarioInfo(xml_node<char>*& parent_node) {
 			node_ = value;
 		}
 		else {
-			LogSEErr("Node no value");
+			LogDDSErr("Node no value");
 			return false;
 		}
 	}
 	else {
-		LogSEErr("no Node");
+		LogDDSErr("no Node");
 		return false;
 	}
 	return true;
@@ -128,7 +127,7 @@ bool CSScenarioXML::ParserTypeDefine(xml_node<char>*& parent_ndoe) {
 
 	xml_node<> *type_define_node = parent_ndoe->first_node("TypeDefine");
 	if (!type_define_node) {
-		LogSEErr("no TypeDefine");
+		LogDDSErr("no TypeDefine");
 		return false;
 	}
 	xml_attribute<> *att = nullptr;
@@ -144,7 +143,7 @@ bool CSScenarioXML::ParserTypeDefine(xml_node<char>*& parent_ndoe) {
 			type_define_info.type_name = att->value();
 		}
 		else {
-			LogSEErr("Type-name no attribute");
+			LogDDSErr("Type-name no attribute");
 			return false;
 		}
 		//获取自定义类型参数
@@ -158,7 +157,7 @@ bool CSScenarioXML::ParserTypeDefine(xml_node<char>*& parent_ndoe) {
 				param_name = att->value();
 			}
 			else {
-				LogSEErr("Type-Parameter-name no attribute");
+				LogDDSErr("Type-Parameter-name no attribute");
 				return false;
 			}
 			//参数类型
@@ -167,7 +166,7 @@ bool CSScenarioXML::ParserTypeDefine(xml_node<char>*& parent_ndoe) {
 				param_type = att->value();
 			}
 			else {
-				LogSEErr("Type-Parameter-type no attribute");
+				LogDDSErr("Type-Parameter-type no attribute");
 				return false;
 			}
 			type_define_info.params.emplace(param_name, param_type);
@@ -181,7 +180,7 @@ bool CSScenarioXML::ParserTopicDefine(xml_node<char>*& parent_ndoe) {
 
 	xml_node<> *topics_node = parent_ndoe->first_node("Topics");
 	if (!topics_node) {
-		LogSEErr("no Topics");
+		LogDDSErr("no Topics");
 		return false;
 	}
 
@@ -197,7 +196,7 @@ bool CSScenarioXML::ParserTopicDefine(xml_node<char>*& parent_ndoe) {
 			topic_define_info.topic_name = att->value();
 		}
 		else {
-			LogSEErr("Topic-name no attribute");
+			LogDDSErr("Topic-name no attribute");
 			return false;
 		}
 		//获取主题参数类型(主题名就是参数名，主题类型就是参数类型)
@@ -219,7 +218,7 @@ bool CSScenarioXML::ParserPublishSubscribe(xml_node<char>*& parent_node) {
 	xml_node<> *models_node = parent_node->first_node("Models");
 
 	if (!models_node) {
-		LogSEErr("no Models");
+		LogDDSErr("no Models");
 		return false;
 	}
 
@@ -230,7 +229,7 @@ bool CSScenarioXML::ParserPublishSubscribe(xml_node<char>*& parent_node) {
 
 		xml_attribute<> *att = it->first_attribute("name");
 		if (!att) {
-			LogSEErr("Model-name no attribute");
+			LogDDSErr("Model-name no attribute");
 			return false;
 		}
 
@@ -247,7 +246,7 @@ bool CSScenarioXML::ParserPublishSubscribe(xml_node<char>*& parent_node) {
 
 				att = pub_topic->first_attribute("topicName");
 				if (!att) {
-					LogSEErr("Model-Publish-Topic-topicName no attribute");
+					LogDDSErr("Model-Publish-Topic-topicName no attribute");
 					return false;
 				}
 				topic_name = att->value();
@@ -255,7 +254,7 @@ bool CSScenarioXML::ParserPublishSubscribe(xml_node<char>*& parent_node) {
 			}
 		}
 		else {
-			LogSEErr("no Publish");
+			LogDDSErr("no Publish");
 			return false;
 		}
 
@@ -267,7 +266,7 @@ bool CSScenarioXML::ParserPublishSubscribe(xml_node<char>*& parent_node) {
 
 				att = sub_topic->first_attribute("topicName");
 				if (!att) {
-					LogSEErr("Model-Subscribe-Topic-topicName no attribute");
+					LogDDSErr("Model-Subscribe-Topic-topicName no attribute");
 					return false;
 				}
 				topic_name = att->value();
@@ -275,7 +274,7 @@ bool CSScenarioXML::ParserPublishSubscribe(xml_node<char>*& parent_node) {
 			}
 		}
 		else {
-			LogSEErr("no Subscribe");
+			LogDDSErr("no Subscribe");
 			return false;
 		}
 		pub_sub_[model_name] = pub_sub_item;
@@ -293,7 +292,7 @@ TopicDefineInfo CSScenarioXML::GetTopicDefineInfo(const string &topic_name) cons
 	}
 	else {
 		TopicDefineInfo tmp;
-		LogSEErr("TopicDefineInfo get none");
+		LogDDSErr("TopicDefineInfo get none");
 		return tmp;
 	}
 }
@@ -305,7 +304,7 @@ TypeDefineInfo CSScenarioXML::GetTypeDefineInfo(const string &type_name) const {
 	}
 	else {
 		TypeDefineInfo tmp;
-		LogSEErr("TypeDefineInfo get none");
+		LogDDSErr("TypeDefineInfo get none");
 		return tmp;
 	}
 }
@@ -317,7 +316,7 @@ PubSubItem CSScenarioXML::GetPubSub(const string &node_name) const {
 	}
 	else {
 		PubSubItem tmp;
-		LogSEErr("PubSubItem get none");
+		LogDDSErr("PubSubItem get none");
 		return tmp;
 	}
 }

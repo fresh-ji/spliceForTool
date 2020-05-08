@@ -8,116 +8,77 @@
 #include "cssimlog.h"
 
 CSSimLog* CSSimLog::Instance() {
-	static CSSimLog inst;
-	return &inst;
+	try {
+		static CSSimLog inst;
+		return &inst;
+	}
+	catch (...) {
+		std::cout << "[ERRLOG] log get instance fail catched" << std::endl;
+	}
 }
 
 bool CSSimLog::CreateLog(const std::string& log_path) {
-	spdlog::set_level(spdlog::level::trace);
-	spdlog::flush_every(std::chrono::seconds(2));
-	spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%n] [%l] %v");
+	try {
+		spdlog::set_level(spdlog::level::trace);
+		spdlog::flush_every(std::chrono::seconds(2));
+		spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%n] [%l] %v");
 
-	auto log = spdlog::basic_logger_mt<spdlog::async_factory>("log",
-		log_path);
+		// create
+		log_names_ = "log";
+		auto log = spdlog::basic_logger_mt<spdlog::async_factory>(
+			log_names_, log_path);
 
-	log_names_.insert("log");
-
-	if (log) {
-		log->info("create asy log success");
-		log_path_ = log_path;
-		return true;
+		if (log) {
+			log->info("create asy log success");
+			return true;
+		}
+		std::cout << "log create fail " << std::endl;
+		return false;
 	}
-	return false;
-}
-
-void CSSimLog::SetLevel(uint32_t level) {
-	spdlog::set_level(spdlog::level::level_enum(level));
-}
-
-bool CSSimLog::AddCategory(const std::string& category) {
-	auto log = spdlog::get(category);
-	if (log) {
-		return true;
+	catch (...) {
+		std::cout << "[ERRLOG] log create fail catched" << std::endl;
+		return false;
 	}
-
-	auto new_log = spdlog::basic_logger_mt<spdlog::async_factory>(category,
-		log_path_);
-	if (new_log) {
-		return true;
-	}
-	return false;
 }
 
 bool CSSimLog::CloseLog() {
-
-	auto lg = spdlog::get("log");
-	if (lg) {
-		lg->info("log exit");
-	}
-
-	//退出前输出所有日志
-	for (auto& p : log_names_) {
-		auto log = spdlog::get(p);
+	try {
+		// log all
+		auto log = spdlog::get(log_names_);
 		if (log) {
+			log->info("log exit");
 			log->flush();
 		}
+		spdlog::shutdown();
+		return true;
 	}
-
-	spdlog::shutdown();
-	return true;
-}
-
-void CSSimLog::SetCurrentTime(int current_time) {
-	current_time_ = current_time;
-}
-
-void CSSimLog::SetCurrentTime(const std::string& current_time) {
-	current_time_str_ = current_time;
-}
-
-CSSimLog::CSSimLog() {
-
-}
-
-CSSimLog::~CSSimLog() {
-
-}
-
-void CSSimLog::Write(const std::string& name, uint32_t level,
-	const std::string& msg, const char *filename_in, int line_in,
-	const char *funcname_in) {
-
-	std::shared_ptr<spdlog::logger> lg = spdlog::get(name);
-	if (!lg) {
-		lg = spdlog::basic_logger_mt<spdlog::async_factory>(name, log_path_);
-		log_names_.insert(name);
+	catch (...) {
+		std::cout << "[ERRLOG] log close fail catched" << std::endl;
+		return false;
 	}
-
-	std::string file_path = filename_in;
-    std::string file_name = file_path.substr(file_path.find_last_of('\\') + 1);
-
-    lg->log(spdlog::level::level_enum(level), "[{0:s}:{1:d}] [{2:s}] {3:s} ",
-            file_name, line_in, funcname_in, msg);
 }
 
 void CSSimLog::Write(const std::string& category, uint32_t level,
-	const std::string& msg) {
-	std::shared_ptr<spdlog::logger> lg = spdlog::get(category);
-	if (!lg) {
-		lg = spdlog::basic_logger_mt<spdlog::async_factory>(category, log_path_);
-		log_names_.insert(category);
+	const std::string& msg, const char *filename_in, int line_in,
+	const char *funcname_in) {
+	try {
+		std::shared_ptr<spdlog::logger> lg = spdlog::get(category);
+		if (!lg) {
+			// std::cout << "category not exist at writing " << msg << std::endl;
+			return;
+		}
+		std::string file_path = filename_in;
+		std::string file_name = file_path.substr(file_path.find_last_of('\\') + 1);
+		lg->log(spdlog::level::level_enum(level), "[{0:s}:{1:d}] [{2:s}] {3:s} ",
+			file_name, line_in, funcname_in, msg);
 	}
-	std::string time_msg = std::string("[") + current_time_str_ + std::string("] ")
-		+ msg;
-	lg->log(spdlog::level::level_enum(level), "{0}", time_msg);
+	catch (...) {
+		std::cout << "[ERRLOG] log write fail catched" << std::endl;
+	}
 }
 
-void CSSIMLOG_EXPORT ModuleLog(const std::string& msg, uint32_t level,
-	const std::string& entity_uuid) {
-	std::string mesg = "[" + entity_uuid + "] " + msg;
-	LogModule("module", level, mesg)
+CSSimLog::CSSimLog() {
 }
 
-bool CSSIMLOG_EXPORT CreateLog(const std::string& log_path) {
-	return CSSimLog::Instance()->CreateLog(log_path);
+CSSimLog::~CSSimLog() {
 }

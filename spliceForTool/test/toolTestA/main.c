@@ -5,6 +5,31 @@
 
 // INSA
 
+// 1
+typedef char*(*FunDLL1)(char*,
+	void(*initTool)(double, double),
+	void(*setToTool)(double, char*, void*),
+	void(*setFinish)(double),
+	void(*endTool)());
+FunDLL1 startFun;
+// 2
+typedef int(*FunDLL2)(char*, void*);
+FunDLL2 setFun;
+// 3
+typedef int(*FunDLL3)();
+FunDLL3 advanceFun;
+// 4
+typedef int(*FunDLL4)();
+FunDLL4 endFun;
+
+void initTool(double, double);
+void setToTool(double, char*, void*);
+void setFinish(double);
+void endTool();
+
+int endFlag = 0;
+char* token;
+
 typedef struct _UDPosition {
 	double longitude;
 	double latitude;
@@ -23,34 +48,10 @@ typedef struct _UDPosture {
 	int	gamma;
 } UDPosture;
 
-static double topic_data = 0;
-
-void initTool(double, double);
-void setToTool(double, char*, void*);
-void setFinish(double);
-void endTool();
-
-int endFlag = 0;
-char* token;
-
-// 1
-typedef char*(*FunDLL1)(char*,
-	void(*initTool)(double, double),
-	void(*setToTool)(double, char*, void*),
-	void(*setFinish)(double),
-	void(*endTool)());
-FunDLL1 startFun;
-// 2
-typedef int(*FunDLL2)(char*, void*);
-FunDLL2 setFun;
-// 3
-typedef int(*FunDLL3)();
-FunDLL3 advanceFun;
-// 4
-typedef int(*FunDLL4)();
-FunDLL4 endFun;
+static double topic_data;
 
 void initTool(double startTime, double step) {
+	topic_data = 0;
 	printf("i should start at %f and step is %f\n", startTime, step);
 	advanceFun();
 }
@@ -87,9 +88,7 @@ void setFinish(double time) {
 }
 
 void endTool() {
-	endFun();
 	printf("i am over\n");
-	endFlag = 1;
 }
 
 int main(int argc, char *argv[]) {
@@ -97,7 +96,6 @@ int main(int argc, char *argv[]) {
 	DWORD err = 0;
 
 	HMODULE hInstC = LoadLibraryEx(_T("spliceForTool"), NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
-	//HMODULE hInstC = LoadLibrary(_T("spliceForTool"));
 	if (hInstC == NULL) {
 		err = GetLastError();
 		printf("load dll fail %d", err);
@@ -108,17 +106,6 @@ int main(int argc, char *argv[]) {
 	setFun = (FunDLL2)GetProcAddress(hInstC, "dllSetValue");
 	advanceFun = (FunDLL3)GetProcAddress(hInstC, "dllAdvance");
 	endFun = (FunDLL4)GetProcAddress(hInstC, "dllEnd");
-
-	UDPosition pos;
-	pos.longitude = 0.0;
-	pos.latitude = 0.0;
-	pos.altitude = 0.0;
-	pos.x = 0.0;
-	pos.y = 0.0;
-	pos.z = 0.0;
-	char topic_name[10] = "topic_002";
-	char topic_name2[20] = "advance_grant";
-	int time = 1;
 
 	token = startFun("Gr342ttL_insA.xml",
 		initTool, setToTool, setFinish, endTool);

@@ -8,10 +8,10 @@
 #else
 #  ifndef CSDDS_SERVICE_EXPORT
 #    ifdef csdds_service_EXPORTS
-        /* We are building this library */
+/* We are building this library */
 #      define CSDDS_SERVICE_EXPORT __declspec(dllexport)
 #    else
-        /* We are using this library */
+/* We are using this library */
 #      define CSDDS_SERVICE_EXPORT __declspec(dllimport)
 #    endif
 #  endif
