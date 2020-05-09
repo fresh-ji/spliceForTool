@@ -24,7 +24,7 @@ bool CSSimLog::CreateLog(const std::string& log_path) {
 		spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%n] [%l] %v");
 
 		// create
-		log_names_ = "log";
+		log_names_ = "dds";
 		auto log = spdlog::basic_logger_mt<spdlog::async_factory>(
 			log_names_, log_path);
 
@@ -64,7 +64,7 @@ void CSSimLog::Write(const std::string& category, uint32_t level,
 	try {
 		std::shared_ptr<spdlog::logger> lg = spdlog::get(category);
 		if (!lg) {
-			// std::cout << "category not exist at writing " << msg << std::endl;
+			std::cout << "category not exist at writing " << msg << std::endl;
 			return;
 		}
 		std::string file_path = filename_in;

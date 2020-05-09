@@ -21,14 +21,12 @@ string Interface::start(string configName,
 
 	string msg;
 	try {
-
-		SetOsplEnv();
-
 		// 1.Read Config
 		if (!p_XMLapi->ReadXML(configName)) {
 			LogDDSErr("parse xml file fail");
 			return "";
 		}
+
 		systemId = p_XMLapi->GetSystemId();
 		nodeName = p_XMLapi->GetNodeName();
 		PubSubItem pub_sub = p_XMLapi->GetPubSub(nodeName);
@@ -38,6 +36,11 @@ string Interface::start(string configName,
 		// 2.Log
 		string csscenario_full_logname = nodeName + ".txt";
 		CSSimLog::Instance()->CreateLog(csscenario_full_logname);
+		LogDDSInfo("created log");
+
+		// 2.5.env
+		SetOsplEnv();
+		LogDDSInfo("set env");
 
 		// 3.Parameters
 		currentTime = 0.0;
@@ -49,6 +52,7 @@ string Interface::start(string configName,
 		// 4.DDS
 		p_ddsInst = CSDDSService::Instance();
 		p_ddsInst->Init(systemId);
+		LogDDSInfo("initialed dds");
 
 		for (auto pubName : pubNames){
 			p_ddsInst->CreateTopic(pubName);
