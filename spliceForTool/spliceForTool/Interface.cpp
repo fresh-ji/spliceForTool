@@ -247,5 +247,13 @@ bool Interface::SetOsplEnv() {
 	strcat(ospl_file_path, "/external/OpenSplice/etc/config/ospl.xml");
 	errno_t er = _putenv_s("OSPL_URI", ospl_file_path);
 
+	char ospl_file_path2[MAX_PATH];
+	memset(ospl_file_path2, 0, sizeof(ospl_file_path2));
+	strcat(ospl_file_path2, pathvar);
+	strcat(ospl_file_path2, "/lark_simu_ospl_log/");
+	errno_t er2 = _putenv_s("OSPL_LOGPATH", ospl_file_path2);
+
+	cout << getenv("OSPL_LOGPATH") << endl;
+
 	return true;
 }
