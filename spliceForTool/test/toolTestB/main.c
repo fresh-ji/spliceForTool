@@ -52,6 +52,12 @@ FunDLL4 endFun;
 
 void initTool(double startTime, double step) {
 	printf("i should start at %f and step is %f\n", startTime, step);
+	pos.longitude = 0.0;
+	pos.latitude = 0.0;
+	pos.altitude = 0.0;
+	pos.x = 0.0;
+	pos.y = 0.0;
+	pos.z = 0.0;
 	advanceFun();
 }
 
@@ -83,9 +89,7 @@ void setFinish(double time) {
 }
 
 void endTool() {
-	endFun();
 	printf("i am over\n");
-	endFlag = 1;
 }
 
 int main(int argc, char *argv[]) {
@@ -93,7 +97,6 @@ int main(int argc, char *argv[]) {
 	DWORD err = 0;
 
 	HMODULE hInstC = LoadLibraryEx(_T("spliceForTool"), NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
-	//HMODULE hInstC = LoadLibrary(_T("spliceForTool"));
 	if (hInstC == NULL) {
 		err = GetLastError();
 		printf("load dll fail %d", err);
@@ -104,16 +107,6 @@ int main(int argc, char *argv[]) {
 	setFun = (FunDLL2)GetProcAddress(hInstC, "dllSetValue");
 	advanceFun = (FunDLL3)GetProcAddress(hInstC, "dllAdvance");
 	endFun = (FunDLL4)GetProcAddress(hInstC, "dllEnd");
-
-	pos.longitude = 0.0;
-	pos.latitude = 0.0;
-	pos.altitude = 0.0;
-	pos.x = 0.0;
-	pos.y = 0.0;
-	pos.z = 0.0;
-	char topic_name[10] = "topic_002";
-	char topic_name2[20] = "advance_grant";
-	int time = 1;
 
 	token = startFun("Gr342ttL_insB.xml",
 		initTool, setToTool, setFinish, endTool);
