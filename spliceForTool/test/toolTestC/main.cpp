@@ -32,6 +32,7 @@ void endTool();
 
 int endFlag = 0;
 char* token;
+HMODULE hInstC;
 
 // 1
 typedef char*(*FunDLL1)(char*,
@@ -96,14 +97,16 @@ void setFinish(double time) {
 }
 
 void endTool() {
-	printf("i am over\n");
+	printf("i am over, please close me soon\n");
+	FreeLibrary(hInstC);
+	endFlag = 1;
 }
 
 int main(int argc, char *argv[]) {
 
 	DWORD err = 0;
 
-	HMODULE hInstC = LoadLibraryEx(_T("spliceForTool"), NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
+	hInstC = LoadLibraryEx(_T("spliceForTool"), NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
 	if (hInstC == NULL) {
 		err = GetLastError();
 		printf("load dll fail %d", err);
@@ -126,7 +129,6 @@ int main(int argc, char *argv[]) {
 		while (1) {
 			Sleep(30);
 			if (endFlag == 1) {
-				FreeLibrary(hInstC);
 				break;
 			}
 		}

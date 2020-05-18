@@ -14,8 +14,10 @@ using namespace std;
 #define INITIAL_FEDERATE "initial_federate"
 #define ADVANCE_REQUEST "advance_request"
 #define ADVANCE_GRANT "advance_grant"
-#define SIMULATION_RUN "simulation_run"
+// #define SIMULATION_RUN "simulation_run"
 #define SIMULATION_END "simulation_end"
+#define DUPLICATED_ONLINE "duplicated_online"
+#define NODE_END "node_end"
 
 /**
 * @brief	目前的统一引擎名

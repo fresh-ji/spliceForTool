@@ -46,6 +46,8 @@ private:
 	double currentTime;
 	double step;
 
+	bool isInitial;
+
 private:
 	// data management
 	map<string, string> dataMap;

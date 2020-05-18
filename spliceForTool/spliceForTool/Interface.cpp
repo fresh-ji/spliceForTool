@@ -5,6 +5,7 @@
 Interface::Interface() {
 	p_XMLapi = new CSScenarioXML();
 	p_JSONapi = new JSONapi(p_XMLapi);
+	isInitial = false;
 }
 
 Interface::~Interface() {
@@ -118,7 +119,11 @@ bool Interface::advance() {
 }
 
 bool Interface::end() {
-	// TODO 用户申请结束一次
+	if (!publish(NODE_END, nodeName)) {
+		string msg = systemId + " reauest end " + to_string(currentTime);
+		LogDDSErr(msg);
+		return false;
+	}
 	return true;
 }
 
@@ -176,8 +181,17 @@ bool Interface::process(const MsgData& msgdata) {
 		ss >> step;
 
 		(*p_initTool)(currentTime, step);
+
+		isInitial = true;
 	}
 	else if (tName == ADVANCE_GRANT) {
+
+		if (!isInitial) {
+			(*p_endTool)();
+			p_ddsInst->StopReceiveData();
+			return false;
+		}
+
 		map<string, string> tempMap = dataMap;
 		dataMap = backupDataMap;
 		backupDataMap.clear();
@@ -202,8 +216,15 @@ bool Interface::process(const MsgData& msgdata) {
 		currentTime = msgdata.time;
 		(*p_setFinish)(currentTime);
 	}
+	else if (tName == DUPLICATED_ONLINE) {
+		if (nodeName == msgdata.content) {
+			(*p_endTool)();
+			p_ddsInst->StopReceiveData();
+		}
+	}
 	else if (tName == SIMULATION_END) {
 		(*p_endTool)();
+		p_ddsInst->StopReceiveData();
 	}
 	else {
 		// actual data
@@ -228,13 +249,13 @@ bool Interface::publish(string topic, string data) {
 }
 
 bool Interface::SetOsplEnv() {
-	
+
 	/*
 	char path[MAX_PATH];
 	memset(path, 0, sizeof(path));
 	if (GetModuleFileName(NULL, path, MAX_PATH) > 0)
 	{
-		(*strrchr(path, '\\')) = '\0';//丢掉文件名，得到路径
+	(*strrchr(path, '\\')) = '\0';//丢掉文件名，得到路径
 	}
 	*/
 
@@ -252,8 +273,6 @@ bool Interface::SetOsplEnv() {
 	strcat(ospl_file_path2, pathvar);
 	strcat(ospl_file_path2, "/lark_simu_ospl_log/");
 	errno_t er2 = _putenv_s("OSPL_LOGPATH", ospl_file_path2);
-
-	cout << getenv("OSPL_LOGPATH") << endl;
 
 	return true;
 }

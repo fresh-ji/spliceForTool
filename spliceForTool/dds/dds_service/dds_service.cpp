@@ -18,7 +18,6 @@ CSDDSService::CSDDSService() {
 }
 
 CSDDSService::~CSDDSService() {
-	Clear();
 }
 
 CSDDSService* CSDDSService::Instance() {
@@ -433,6 +432,7 @@ void CSDDSService::StopReceiveData(){
 		read_flag_ = false;
 	}
 	logMe(1, "stop read thread successed");
+	Clear();
 }
 
 void CSDDSService::SetCallBack(std::function<bool(MsgData)> cb){
