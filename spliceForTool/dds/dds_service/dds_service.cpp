@@ -127,19 +127,6 @@ void CSDDSService::RegisterType() {
 	logMe(1, "register_type success");
 }
 
-void CSDDSService::DeleteParticipant() {
-
-	read_flag_ = false;
-	if (read_thread_.joinable()){
-		read_thread_.join();
-	}
-
-	auto status = dpf_->delete_participant(participant_.in());
-	if (!CheckStatus(status, "DDS::DomainParticipant::delete_participant")) {
-		logMe(2, "DDS::DomainParticipant::delete_participant");
-	}
-}
-
 bool CSDDSService::CreateTopic(const std::string& topic_name) {
 
 	auto it = topics_.find(topic_name);
@@ -441,15 +428,13 @@ void CSDDSService::SetCallBack(std::function<bool(MsgData)> cb){
 
 void CSDDSService::Clear() {
 
-	read_flag_ = false;
-
 	try {
 		if (read_thread_.joinable()){
 			read_thread_.join();
 		}
 	}
 	catch (const std::exception& e) {
-		std::cerr << e.what() << std::endl;
+		std::cerr  << e.what() << std::endl;
 	}
 
 	logMe(1, "stop read thread done");
@@ -518,9 +503,9 @@ DomainParticipant_ptr CSDDSService::getParticipant() {
 void CSDDSService::logMe(int type, std::string msg) {
 
 	if (1 == type) {
-		// LogDDSInfo(msg);
+		LogDDSInfo(msg);
 	}
 	else if (2 == type) {
-		// LogDDSErr(msg);
+		LogDDSErr(msg);
 	}
 }

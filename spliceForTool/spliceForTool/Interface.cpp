@@ -120,7 +120,7 @@ bool Interface::advance() {
 
 bool Interface::end() {
 	if (!publish(NODE_END, nodeName)) {
-		string msg = systemId + " reauest end " + to_string(currentTime);
+		string msg = systemId + " request end " + to_string(currentTime);
 		LogDDSErr(msg);
 		return false;
 	}
@@ -187,8 +187,8 @@ bool Interface::process(const MsgData& msgdata) {
 	else if (tName == ADVANCE_GRANT) {
 
 		if (!isInitial) {
-			(*p_endTool)();
 			p_ddsInst->StopReceiveData();
+			(*p_endTool)();
 			return false;
 		}
 
@@ -218,13 +218,13 @@ bool Interface::process(const MsgData& msgdata) {
 	}
 	else if (tName == DUPLICATED_ONLINE) {
 		if (nodeName == msgdata.content) {
-			(*p_endTool)();
 			p_ddsInst->StopReceiveData();
+			(*p_endTool)();
 		}
 	}
 	else if (tName == SIMULATION_END) {
-		(*p_endTool)();
 		p_ddsInst->StopReceiveData();
+		(*p_endTool)();
 	}
 	else {
 		// actual data

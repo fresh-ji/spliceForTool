@@ -4,15 +4,17 @@
 #include <stdio.h>
 
 /**** 预留勿改 ****/
+// 回调定义
+void initTool(double, double);
+void setToTool(double, char*, void*);
+void setFinish(double);
+void endTool();
+//接口定义
 typedef char*(*FunDLL1)(char*,
 	void(*initTool)(double, double),
 	void(*setToTool)(double, char*, void*),
 	void(*setFinish)(double),
 	void(*endTool)());
-void initTool(double, double);
-void setToTool(double, char*, void*);
-void setFinish(double);
-void endTool();
 FunDLL1 startFun;
 typedef int(*FunDLL2)(char*, void*);
 FunDLL2 setFun;

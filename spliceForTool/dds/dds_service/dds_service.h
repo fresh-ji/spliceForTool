@@ -36,8 +36,6 @@ public:
 	bool CreateSubscriber();
 	void RegisterType();
 
-	void DeleteParticipant();
-
 	bool CreateTopic(const std::string& topic_name);
 	bool CreateWriter(const std::string& topic_name);
 	bool CreateReader(const std::string& topic_name);
