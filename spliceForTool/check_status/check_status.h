@@ -2,8 +2,10 @@
 #ifndef __CHECKSTATUS_H__
 #define __CHECKSTATUS_H__
 
-#include "ccpp_dds_dcps.h"
 #include <iostream>
+
+#include "ccpp_dds_dcps.h"
+#include "cssimlog/cssimlog.h"
 
 /**
  * Returns the name of an error code.

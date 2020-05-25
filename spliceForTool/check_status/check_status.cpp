@@ -24,7 +24,9 @@ std::string getErrorName(DDS::ReturnCode_t status) {
  **/
 bool CheckStatus(DDS::ReturnCode_t status, const char *info) {
 	if (status != DDS::RETCODE_OK && status != DDS::RETCODE_NO_DATA) {
-		std::cerr << "Error in " << info << ": " << getErrorName(status).c_str() << std::endl;
+		std::string str = info;
+		std::string msg = "Error in " + str + ": " + getErrorName(status).c_str();
+		LogDDSErr(msg);
 		return false;
 	}
 	return true;
@@ -35,7 +37,8 @@ bool CheckStatus(DDS::ReturnCode_t status, const char *info) {
  **/
 bool CheckHandle(void *handle, std::string info) {
 	if (!handle) {
-		std::cerr << "Error in " << info.c_str() << ": Creation failed: invalid handle" << std::endl;
+		std::string msg = "Error in " + info + ": Creation failed: invalid handle";
+		LogDDSErr(msg);
 		return false;
 	}
 	return true;

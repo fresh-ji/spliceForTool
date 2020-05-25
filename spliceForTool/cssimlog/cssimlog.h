@@ -26,7 +26,7 @@ public:
 	void Write(const std::string& category, uint32_t level, const std::string& msg,
 		const char *filename_in, int line_in, const char *funcname_in) override;
 
-	bool CloseLog();
+	bool CloseLog() override;
 
 private:
 	CSSimLog();

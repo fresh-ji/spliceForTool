@@ -2,6 +2,7 @@
 #ifndef CS_SCENARIO_XML_H
 #define CS_SCENARIO_XML_H
 
+#include <windows.h>
 #include <map>
 
 #include "rapidxml/rapidxml.hpp"
@@ -18,7 +19,6 @@ class CSScenarioXML {
 
 public:
 	CSScenarioXML() = default;
-	CSScenarioXML(const string& xml_path);
 	~CSScenarioXML() = default;
 
 	CSScenarioXML(const CSScenarioXML& other) = delete;
@@ -35,7 +35,6 @@ public:
 	PubSubItem GetPubSub(const string &type_name) const;
 
 protected:
-
 	bool ParserScenarioInfo(xml_node<char>*& parent_node);
 	bool ParserTypeDefine(xml_node<char>*& parent_ndoe);
 	bool ParserTopicDefine(xml_node<char>*& parent_ndoe);

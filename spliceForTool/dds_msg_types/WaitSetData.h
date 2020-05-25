@@ -17,20 +17,20 @@
 
 namespace WaitSetData
 {
-   struct Msg;
+	struct Msg;
 
-   struct OS_EXAMPLE_API Msg
-   {
-         DDS::Long subjectId;
-         DDS::String_mgr systemId;
-         DDS::Double time;
-         DDS::String_mgr from;
-         DDS::String_mgr topicName;
-         DDS::String_mgr content;
-   };
+	struct OS_EXAMPLE_API Msg
+	{
+		DDS::Long subjectId;
+		DDS::String_mgr systemId;
+		DDS::Double time;
+		DDS::String_mgr from;
+		DDS::String_mgr topicName;
+		DDS::String_mgr content;
+	};
 
-   typedef DDS_DCPSStruct_var < Msg> Msg_var;
-   typedef DDS_DCPSStruct_out < Msg> Msg_out;
+	typedef DDS_DCPSStruct_var < Msg> Msg_var;
+	typedef DDS_DCPSStruct_out < Msg> Msg_out;
 }
 
 

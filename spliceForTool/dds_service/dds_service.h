@@ -2,10 +2,6 @@
 #ifndef DDS_SERVICE_H
 #define DDS_SERVICE_H
 
-//dds
-#include "csdds_service_export.h"
-#include "ccpp_dds_dcps.h"
-
 //std
 #include <vector>
 #include <functional>
@@ -13,6 +9,10 @@
 #include <thread>
 #include <atomic>
 #include <iostream>
+
+//dds
+#include "csdds_service_export.h"
+#include "ccpp_dds_dcps.h"
 
 using namespace DDS;
 
@@ -26,6 +26,7 @@ typedef struct _MsgData {
 } MsgData;
 
 class CSDDS_SERVICE_EXPORT CSDDSService  {
+
 public:
 	static CSDDSService* Instance();
 
@@ -88,8 +89,6 @@ private:
 	std::map<std::string, DataReader_var> readers_;
 	std::map<std::string, DataWriter_var> writers_;
 	std::map<std::string, ReadCondition_var> conditions_;
-
-	void logMe(int type, std::string msg);
 };
 
 #endif

@@ -27,7 +27,7 @@ using namespace std;
 /**
 * @brief	是否显示测试输出
 */
-#define STDOUTTEST
+#define STDOUTTRACE
 
 /**
 * @param	开始时间
@@ -47,8 +47,13 @@ typedef void(*setToTool)(double, char*, void*);
 */
 typedef void(*setFinish)(double);
 
+/**
+*/
 typedef void(*endTool)();
 
+/**
+* @brief	XML解析中的数据结构
+*/
 typedef struct _TopicInfo {
 	string topic_type;
 	unordered_map<string, string> params;

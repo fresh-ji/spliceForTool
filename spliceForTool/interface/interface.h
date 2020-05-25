@@ -6,7 +6,7 @@
 #include <iostream>
 #include <sstream>
 
-#include "JSONapi.h"
+#include "json_convert.h"
 #include "dds_service.h"
 
 #include "cssimlog.h"

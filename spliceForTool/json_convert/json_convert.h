@@ -6,7 +6,7 @@
 #include "rapidjson/writer.h"
 #include "rapidjson/stringbuffer.h"
 
-#include "XMLapi.h"
+#include "xml_parse.h"
 
 using namespace rapidjson;
 using namespace std;
