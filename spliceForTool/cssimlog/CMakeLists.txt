@@ -21,17 +21,10 @@ INCLUDE_DIRECTORIES(
 
 ################################################################################################${CS_BROWSER_MOC_SRCS}
 
-#生成库
+# 生成库
 ADD_LIBRARY(${CURRENT_PROJ_NAME} SHARED ${CS_LOG_HEADERS} ${CS_LOG_SRC})
-
-# SET_TARGET_PROPERTIES(${CURRENT_PROJ_NAME} PROPERTIES FOLDER "common")
 
 #生成头文件
 GENERATE_EXPORT_HEADER(cssimlog
-EXPORT_FILE_NAME ${CS_EXPORT_HEADER}
+  EXPORT_FILE_NAME ${CS_EXPORT_HEADER}
 )
-
-#链接库
-#TARGET_LINK_LIBRARIES(cssimlog  
-  #spdlog 
-#)

@@ -1,6 +1,5 @@
-ADD_SUBDIRECTORY(toolTestA)
-ADD_SUBDIRECTORY(toolTestB)
-ADD_SUBDIRECTORY(toolTestC)
+
+ADD_SUBDIRECTORY(toolTestSample)
 
 
 

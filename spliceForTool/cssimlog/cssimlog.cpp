@@ -12,8 +12,14 @@ CSSimLog* CSSimLog::Instance() {
 		static CSSimLog inst;
 		return &inst;
 	}
+	catch (std::exception &e) {
+		std::string er = e.what();
+		std::cout << "CSSimLog::Instance " + er << std::endl;
+		return NULL;
+	}
 	catch (...) {
-		std::cout << "[ERRLOG] log get instance fail catched" << std::endl;
+		std::cout << "CSSimLog::Instance CATCHED!!" << std::endl;
+		return NULL;
 	}
 }
 
@@ -23,20 +29,24 @@ bool CSSimLog::CreateLog(const std::string& log_path) {
 		spdlog::flush_every(std::chrono::seconds(2));
 		spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%n] [%l] %v");
 
-		// create
 		log_names_ = "dds";
 		auto log = spdlog::basic_logger_mt<spdlog::async_factory>(
 			log_names_, log_path);
 
-		if (log) {
-			log->info("create asy log success");
-			return true;
+		if (!log) {
+			std::cout
+				<< "CSSimLog::CreateLog log create fail " << std::endl;
+			return false;
 		}
-		std::cout << "log create fail " << std::endl;
+		return true;
+	}
+	catch (std::exception &e) {
+		std::string er = e.what();
+		std::cout << "CSSimLog::CreateLog " + er << std::endl;
 		return false;
 	}
 	catch (...) {
-		std::cout << "[ERRLOG] log create fail catched" << std::endl;
+		std::cout << "CSSimLog::CreateLog CATCHED!!" << std::endl;
 		return false;
 	}
 }
@@ -52,8 +62,13 @@ bool CSSimLog::CloseLog() {
 		spdlog::shutdown();
 		return true;
 	}
+	catch (std::exception &e) {
+		std::string er = e.what();
+		std::cout << "CSSimLog::CloseLog " + er << std::endl;
+		return false;
+	}
 	catch (...) {
-		std::cout << "[ERRLOG] log close fail catched" << std::endl;
+		std::cout << "CSSimLog::CloseLog CATCHED!!" << std::endl;
 		return false;
 	}
 }
@@ -71,9 +86,14 @@ void CSSimLog::Write(const std::string& category, uint32_t level,
 		std::string file_name = file_path.substr(file_path.find_last_of('\\') + 1);
 		lg->log(spdlog::level::level_enum(level), "[{0:s}:{1:d}] [{2:s}] {3:s} ",
 			file_name, line_in, funcname_in, msg);
+		lg->flush();
+	}
+	catch (std::exception &e) {
+		std::string er = e.what();
+		std::cout << "CSSimLog::Write " + er << std::endl;
 	}
 	catch (...) {
-		std::cout << "[ERRLOG] log write fail catched" << std::endl;
+		std::cout << "CSSimLog::Write CATCHED!!" << std::endl;
 	}
 }
 
