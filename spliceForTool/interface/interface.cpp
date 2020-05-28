@@ -20,15 +20,12 @@ Interface::~Interface() {
 	try {
 		if (NULL != p_XMLapi) {
 			delete p_XMLapi;
-			p_XMLapi = NULL;
 		}
 		if (NULL != p_JSONapi) {
 			delete p_JSONapi;
-			p_JSONapi = NULL;
 		}
 		if (NULL != p_ddsInst) {
 			delete p_ddsInst;
-			p_ddsInst = NULL;
 		}
 	}
 	catch (exception &e) {
@@ -92,7 +89,7 @@ string Interface::start(string configName,
 		p_ddsInst = CSDDSService::Instance();
 		p_ddsInst->Init(systemId);
 		LogDDSInfo("initialed dds");
-
+		
 		for (auto pubName : pubNames){
 			p_ddsInst->CreateTopic(pubName);
 			p_ddsInst->CreateWriter(pubName);
@@ -104,6 +101,7 @@ string Interface::start(string configName,
 		}
 
 		function<bool(MsgData)> cb = bind(&Interface::process, this, placeholders::_1);
+
 		p_ddsInst->SetCallBack(cb);
 		p_ddsInst->StartReceiveData();
 		LogDDSInfo("start dds successed!");
@@ -203,7 +201,6 @@ bool Interface::process(const MsgData& msgdata) {
 		std::cout << "topicName:" << msgdata.topicName << endl;
 		std::cout << "*********************" << endl;
 #endif
-
 		string msg;
 		string str;
 		string str_time = to_string(msgdata.time);
@@ -329,9 +326,7 @@ bool Interface::publish(string topic, string data) {
 }
 
 bool Interface::SetOsplEnv() {
-
 	try {
-
 		char* pathvar = getenv("LARKSIMU_HOME");
 
 		char ospl_file_path[MAX_PATH];

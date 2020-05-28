@@ -2,6 +2,10 @@
 #ifndef DDS_SERVICE_H
 #define DDS_SERVICE_H
 
+#define _WIN32_WINNT 0x0502
+
+#include <Windows.h>
+
 //std
 #include <vector>
 #include <functional>
@@ -89,6 +93,8 @@ private:
 	std::map<std::string, DataReader_var> readers_;
 	std::map<std::string, DataWriter_var> writers_;
 	std::map<std::string, ReadCondition_var> conditions_;
+
+	bool threadRun;
 };
 
 #endif

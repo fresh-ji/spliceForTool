@@ -1,15 +1,16 @@
-ï»¿
+
 #include <tchar.h>
 #include <Windows.h>
 #include <stdio.h>
+#include <iostream>
 
-/**** é¢„ç•™å‹¿æ”¹ ****/
-// å›è°ƒå®šä¹‰
+/**** Ô¤ÁôÎğ¸Ä ****/
+// »Øµ÷¶¨Òå
 void initTool(double, double);
 void setToTool(double, char*, void*);
 void setFinish(double);
 void endTool();
-//æ¥å£å®šä¹‰
+//½Ó¿Ú¶¨Òå
 typedef char*(*FunDLL1)(char*,
 	void(*initTool)(double, double),
 	void(*setToTool)(double, char*, void*),
@@ -23,69 +24,82 @@ FunDLL3 advanceFun;
 typedef int(*FunDLL4)();
 FunDLL4 endFun;
 int endFlag = 0;
-HMODULE hInstC;
-char* token;
-/**** é¢„ç•™å‹¿æ”¹ ****/
+/**** Ô¤ÁôÎğ¸Ä ****/
 
-/**** TODO åœ¨è¿™å®šä¹‰æ•°æ®ç»“æ„ ****/
+/**** TODO ÔÚÕâ¶¨ÒåÊı¾İ½á¹¹ ****/
 
-/**** TODO åœ¨è¿™å®šä¹‰æ•°æ®ç»“æ„ ****/
+struct data {
+	double d;
+	int i;
+	std::string s;
+} data_;
 
-/**** TODO åœ¨è¿™å®šä¹‰æ•°æ® ****/
+/**** TODO ÔÚÕâ¶¨ÒåÊı¾İ½á¹¹ ****/
 
-/**** TODO åœ¨è¿™å®šä¹‰æ•°æ® ****/
+/**** TODO ÔÚÕâ¶¨ÒåÊı¾İ ****/
+
+/**** TODO ÔÚÕâ¶¨ÒåÊı¾İ ****/
 
 void initTool(double startTime, double step) {
-	/**** TODO åœ¨è¿™è¿›è¡Œä»¿çœŸå‰çš„åˆå§‹åŒ– ****/
+	/**** TODO ÔÚÕâ½øĞĞ·ÂÕæÇ°µÄ³õÊ¼»¯ ****/
 
-	/**** TODO åœ¨è¿™è¿›è¡Œä»¿çœŸå‰çš„åˆå§‹åŒ– ****/
-	/**** é¢„ç•™å‹¿æ”¹ ****/
+	/**** TODO ÔÚÕâ½øĞĞ·ÂÕæÇ°µÄ³õÊ¼»¯ ****/
+	/**** Ô¤ÁôÎğ¸Ä ****/
 	printf("i should start at %f and step is %f\n", startTime, step);
 	advanceFun();
-	/**** é¢„ç•™å‹¿æ”¹ ****/
+	/**** Ô¤ÁôÎğ¸Ä ****/
 }
 
 void setToTool(double time, char* name, void* data) {
-	/**** TODO åœ¨è¿™ä¸ªæ–¹æ³•é‡Œæ”¶æ•°æ® ****/
+	/**** TODO ÔÚÕâ¸ö·½·¨ÀïÊÕÊı¾İ ****/
 
-	/**** TODO åœ¨è¿™ä¸ªæ–¹æ³•é‡Œæ”¶æ•°æ® ****/
+	/**** TODO ÔÚÕâ¸ö·½·¨ÀïÊÕÊı¾İ ****/
 }
 
 void setFinish(double time) {
-	/**** TODO åœ¨è¿™è¿›è¡Œæ­¥é•¿æ¨è¿›å’Œæ•°æ®å‘é€ ****/
+	/**** TODO ÔÚÕâ½øĞĞ²½³¤ÍÆ½øºÍÊı¾İ·¢ËÍ ****/
 
-	/**** TODO åœ¨è¿™è¿›è¡Œæ­¥é•¿æ¨è¿›å’Œæ•°æ®å‘é€ ****/
-	/**** é¢„ç•™å‹¿æ”¹ ****/
+	data_.d = 3.0;
+	data_.i = 9;
+	data_.s = "hello";
+	setFun("io", (void*)&data_);
+
+	std::string ss = "world";
+
+	setFun("ss", (void*)&ss);
+
+	/**** TODO ÔÚÕâ½øĞĞ²½³¤ÍÆ½øºÍÊı¾İ·¢ËÍ ****/
+	/**** Ô¤ÁôÎğ¸Ä ****/
 	printf("i did something and go forward to %f\n", time);
 	advanceFun();
-	/**** é¢„ç•™å‹¿æ”¹ ****/
+	/**** Ô¤ÁôÎğ¸Ä ****/
 }
 
 void endTool() {
-	/**** é¢„ç•™å‹¿æ”¹ ****/
-	printf("i am over, please close soon\n");
-	FreeLibrary(hInstC);
+	/**** Ô¤ÁôÎğ¸Ä ****/
+	printf("i am over, please close me soon\n");
 	endFlag = 1;
-	/**** é¢„ç•™å‹¿æ”¹ ****/
+	/**** Ô¤ÁôÎğ¸Ä ****/
 }
 
 int main(int argc, char *argv[]) {
 
-	/**** é¢„ç•™å‹¿æ”¹ ****/
+	/**** Ô¤ÁôÎğ¸Ä ****/
 	DWORD err = 0;
-	hInstC = LoadLibraryEx(_T("spliceForTool"), NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
+	HMODULE hInstC = LoadLibraryEx(_T("spliceForTool"), NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
 	if (hInstC == NULL) {
 		err = GetLastError();
 		printf("load dll fail %d", err);
-		getchar();
+		system("pause");
 	}
+
 	startFun = (FunDLL1)GetProcAddress(hInstC, "dllStart");
 	setFun = (FunDLL2)GetProcAddress(hInstC, "dllSetValue");
 	advanceFun = (FunDLL3)GetProcAddress(hInstC, "dllAdvance");
 	endFun = (FunDLL4)GetProcAddress(hInstC, "dllEnd");
 
-	/**** TODO è¿™é‡Œè¦å†™ä¸‹è½½çš„é…ç½®æ–‡ä»¶çš„è·¯å¾„ ****/
-	token = startFun(argv[1],
+	/**** TODO ÕâÀïÒªĞ´ÏÂÔØµÄÅäÖÃÎÄ¼şµÄÂ·¾¶ ****/
+	char* token = startFun("T3pCRMA6_inst.xml",
 		initTool, setToTool, setFinish, endTool);
 
 	if (strcmp(token, "") == 0) {
@@ -96,12 +110,13 @@ int main(int argc, char *argv[]) {
 		while (1) {
 			Sleep(30);
 			if (endFlag == 1) {
+				// TODO
+				//FreeLibrary(hInstC);
 				break;
 			}
 		}
 	}
-	/**** é¢„ç•™å‹¿æ”¹ ****/
-
-	getchar();
+	/**** Ô¤ÁôÎğ¸Ä ****/
+	system("pause");
 	return 1;
 }

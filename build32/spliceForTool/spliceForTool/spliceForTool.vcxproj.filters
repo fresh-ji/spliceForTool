@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Users\jihang\Desktop\spliceForTool\spliceForTool\spliceForTool\dllmain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\jihang\Desktop\spliceForTool\spliceForTool\spliceForTool\spliceForTool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\jihang\Desktop\spliceForTool\spliceForTool\spliceForTool\stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\jihang\Desktop\spliceForTool\spliceForTool\xml_parse\xml_parse.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\jihang\Desktop\spliceForTool\spliceForTool\json_convert\json_convert.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\jihang\Desktop\spliceForTool\spliceForTool\interface\interface.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Users\jihang\Desktop\spliceForTool\spliceForTool\spliceForTool\spliceForTool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\jihang\Desktop\spliceForTool\spliceForTool\spliceForTool\spliceForTool_export.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\jihang\Desktop\spliceForTool\spliceForTool\spliceForTool\stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\jihang\Desktop\spliceForTool\spliceForTool\spliceForTool\targetver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\jihang\Desktop\spliceForTool\spliceForTool\xml_parse\definition.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\jihang\Desktop\spliceForTool\spliceForTool\xml_parse\xml_parse.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\jihang\Desktop\spliceForTool\spliceForTool\json_convert\json_convert.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Users\jihang\Desktop\spliceForTool\spliceForTool\interface\interface.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\jihang\Desktop\spliceForTool\spliceForTool\spliceForTool\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{42265522-B53F-397F-9D6D-8929B5DAD625}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{0249EE9D-ED64-3AC1-9385-C03B73E0E975}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

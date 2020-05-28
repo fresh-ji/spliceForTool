@@ -86,6 +86,7 @@ void CSSimLog::Write(const std::string& category, uint32_t level,
 		std::string file_name = file_path.substr(file_path.find_last_of('\\') + 1);
 		lg->log(spdlog::level::level_enum(level), "[{0:s}:{1:d}] [{2:s}] {3:s} ",
 			file_name, line_in, funcname_in, msg);
+		lg->flush();
 	}
 	catch (std::exception &e) {
 		std::string er = e.what();

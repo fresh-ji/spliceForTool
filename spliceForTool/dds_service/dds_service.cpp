@@ -10,9 +10,16 @@
 using namespace WaitSetData;
 
 CSDDSService::CSDDSService() {
+	threadRun = true;
 }
 
 CSDDSService::~CSDDSService() {
+	while (1) {
+		Sleep(100);
+		if (!threadRun) {
+			break;
+		}
+	}
 }
 
 CSDDSService* CSDDSService::Instance() {
@@ -214,6 +221,7 @@ bool CSDDSService::CreateTopic(const std::string& topic_name) {
 
 		Topic_var topic = participant_->create_topic(topic_name.c_str(),
 			type_name_, reliable_topic_qos, NULL, STATUS_MASK_NONE);
+
 		if (!CheckHandle(topic.in(), "DDS::DomainParticipant::create_topic")) {
 			return false;
 		}
@@ -527,13 +535,13 @@ void CSDDSService::ReadWithWaitSet() {
 							auto reader = readers_[topic_name];
 							MsgDataReader_var MsgReader = MsgDataReader::_narrow(reader.in());
 							if (!CheckHandle(MsgReader.in(), "MsgDataReader::_narrow")) {
-								return;
+								continue;
 							}
 							status = MsgReader->take_w_condition(
 								msgList, infoSeq, LENGTH_UNLIMITED, condition.in());
 							if (!CheckStatus(
 								status, "WaitSetData::MsgDataReader::take_w_condition")) {
-								return;
+								continue;
 							}
 
 							for (DDS::ULong j = 0; j < msgList.length(); j++) {
@@ -555,7 +563,7 @@ void CSDDSService::ReadWithWaitSet() {
 								status = MsgReader->return_loan(msgList, infoSeq);
 								if (!CheckStatus(
 									status, "WaitSetData::MsgDataReader::return_loan")) {
-									return;
+									continue;
 								}
 							}
 						}
@@ -566,21 +574,22 @@ void CSDDSService::ReadWithWaitSet() {
 				// DDS_RETCODE_TIMEOUT is considered as an error
 				// only after it has occurred count times
 				if (!CheckStatus(status, "DDS::WaitSetData::wait")) {
-					return;
+					continue;
 				}
 			}
 			else {
-				LogDDSErr("CSDDSService::ReadWithWaitSet WaitSet timeout");
+				// LogDDSErr("CSDDSService::ReadWithWaitSet 1 WaitSet timeout");
 			}
 		}
+		LogDDSInfo("CSDDSService::ReadWithWaitSet thread ends here");
 	}
 	catch (DDS::Exception &e) {
 		std::string er = e._name();
-		LogDDSErr("CSDDSService::ReadWithWaitSet " + er);
+		LogDDSErr("CSDDSService::ReadWithWaitSet 2 " + er);
 	}
 	catch (std::exception &e) {
 		std::string er = e.what();
-		LogDDSErr("CSDDSService::ReadWithWaitSet " + er);
+		LogDDSErr("CSDDSService::ReadWithWaitSet 3 " + er);
 	}
 	catch (...) {
 		LogDDSCri("CSDDSService::ReadWithWaitSet CATCHED!!");
@@ -632,9 +641,9 @@ void CSDDSService::SetCallBack(std::function<bool(MsgData)> cb) {
 
 void CSDDSService::Clear() {
 	try{
-		if (read_thread_.joinable()){
-			read_thread_.join();
-		}
+		//if (read_thread_.joinable()){
+		//	read_thread_.join();
+		//}
 
 		ReturnCode_t rv = 0;
 
@@ -660,6 +669,8 @@ void CSDDSService::Clear() {
 		subscriber_ = nullptr;
 		newMsgWS = nullptr;
 		memset(&wait_timeout, 0, sizeof(wait_timeout));
+
+		threadRun = false;
 	}
 	catch (DDS::Exception &e) {
 		std::string er = e._name();
