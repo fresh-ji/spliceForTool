@@ -55,8 +55,6 @@ public:
 
 	void SetCallBack(std::function<bool(MsgData)>);
 
-	void Clear();
-
 	DataReader_ptr getReader(const std::string& topic_name);
 	DataWriter_ptr getWriter(const std::string& topic_name);
 

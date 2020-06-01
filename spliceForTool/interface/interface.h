@@ -25,7 +25,6 @@ public:
 	bool advance();
 	bool end();
 
-	~Interface();
 	Interface(const Interface&) = delete;
 	Interface& operator=(const Interface&) = delete;
 

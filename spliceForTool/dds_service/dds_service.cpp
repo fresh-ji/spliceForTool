@@ -582,6 +582,7 @@ void CSDDSService::ReadWithWaitSet() {
 			}
 		}
 		LogDDSInfo("CSDDSService::ReadWithWaitSet thread ends here");
+		threadRun = false;
 	}
 	catch (DDS::Exception &e) {
 		std::string er = e._name();
@@ -620,7 +621,6 @@ void CSDDSService::StopReceiveData() {
 		if (read_flag_) {
 			read_flag_ = false;
 		}
-		Clear();
 	}
 	catch (DDS::Exception &e) {
 		std::string er = e._name();
@@ -637,52 +637,6 @@ void CSDDSService::StopReceiveData() {
 
 void CSDDSService::SetCallBack(std::function<bool(MsgData)> cb) {
 	cb_ = cb;
-}
-
-void CSDDSService::Clear() {
-	try{
-		//if (read_thread_.joinable()){
-		//	read_thread_.join();
-		//}
-
-		ReturnCode_t rv = 0;
-
-		if (participant_) {
-			rv = participant_->delete_contained_entities();
-		}
-
-		if (dpf_) {
-			rv = dpf_->delete_participant(participant_);
-		}
-
-		topics_.clear();
-		writers_.clear();
-		readers_.clear();
-		conditions_.clear();
-
-		participant_ = nullptr;
-		domain_id_ = 0;
-		partition_name_ = "";
-		type_name_ = "";
-
-		publisher_ = nullptr;
-		subscriber_ = nullptr;
-		newMsgWS = nullptr;
-		memset(&wait_timeout, 0, sizeof(wait_timeout));
-
-		threadRun = false;
-	}
-	catch (DDS::Exception &e) {
-		std::string er = e._name();
-		LogDDSErr("CSDDSService::Clear " + er);
-	}
-	catch (std::exception &e) {
-		std::string er = e.what();
-		LogDDSErr("CSDDSService::Clear " + er);
-	}
-	catch (...) {
-		LogDDSCri("CSDDSService::Clear CATCHED!!");
-	}
 }
 
 DataReader_ptr CSDDSService::getReader(const std::string& topic_name) {

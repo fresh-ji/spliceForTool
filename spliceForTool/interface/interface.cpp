@@ -16,27 +16,6 @@ Interface::Interface() {
 	}
 }
 
-Interface::~Interface() {
-	try {
-		if (NULL != p_XMLapi) {
-			delete p_XMLapi;
-		}
-		if (NULL != p_JSONapi) {
-			delete p_JSONapi;
-		}
-		if (NULL != p_ddsInst) {
-			delete p_ddsInst;
-		}
-	}
-	catch (exception &e) {
-		string er = e.what();
-		LogDDSErr("Interface::~Interface " + er);
-	}
-	catch (...) {
-		LogDDSCri("Interface::~Interface CATCHED!!");
-	}
-}
-
 Interface* Interface::Instance() {
 	try {
 		static Interface service;
