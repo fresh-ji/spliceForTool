@@ -14,11 +14,15 @@ CSDDSService::CSDDSService() {
 }
 
 CSDDSService::~CSDDSService() {
-	while (1) {
+	int i;
+	for (i = 0; i < 150; ++i) {
 		Sleep(100);
 		if (!threadRun) {
 			break;
 		}
+	}
+	if (150 == i) {
+		LogDDSErr("DDSapi::~DDSapi dds destruction unnormally");
 	}
 }
 
@@ -200,7 +204,7 @@ void CSDDSService::RegisterType() {
 bool CSDDSService::CreateTopic(const std::string& topic_name) {
 	try {
 		auto it = topics_.find(topic_name);
-		if (it != topics_.end()){
+		if (it != topics_.end()) {
 			return true;
 		}
 
@@ -331,7 +335,7 @@ bool CSDDSService::CreateReader(const std::string& topic_name) {
 
 		status = subscriber_->copy_from_topic_qos(dr_qos, reliable_topic_qos);
 		CheckStatus(status, "DDS::Subscriber::copy_from_topic_qos");
-		dr_qos.reader_data_lifecycle.autopurge_disposed_samples_delay = DDS::DURATION_ZERO;
+		//dr_qos.reader_data_lifecycle.autopurge_disposed_samples_delay = DDS::DURATION_ZERO;
 
 		DataReader_var reader = subscriber_->create_datareader(
 			topic.in(), dr_qos, NULL, STATUS_MASK_NONE);
@@ -351,7 +355,7 @@ bool CSDDSService::CreateReader(const std::string& topic_name) {
 		}
 
 		status = newMsgWS->attach_condition(newMsg.in());
-		if (!CheckStatus(status, "DDS::WaitSetData::attach_condition")){
+		if (!CheckStatus(status, "DDS::WaitSetData::attach_condition")) {
 			return false;
 		}
 
@@ -641,7 +645,7 @@ void CSDDSService::SetCallBack(std::function<bool(MsgData)> cb) {
 
 DataReader_ptr CSDDSService::getReader(const std::string& topic_name) {
 	auto it = readers_.find(topic_name);
-	if (it != readers_.end()){
+	if (it != readers_.end()) {
 		return DataReader::_duplicate(it->second.in());
 	}
 	return NULL;
@@ -649,7 +653,7 @@ DataReader_ptr CSDDSService::getReader(const std::string& topic_name) {
 
 DataWriter_ptr CSDDSService::getWriter(const std::string& topic_name) {
 	auto it = writers_.find(topic_name);
-	if (it != writers_.end()){
+	if (it != writers_.end()) {
 		return DataWriter::_duplicate(it->second.in());
 	}
 	return NULL;
@@ -665,7 +669,7 @@ Subscriber_ptr CSDDSService::getSubscriber() {
 
 Topic_ptr CSDDSService::getTopic(const std::string &topic_name) {
 	auto it = topics_.find(topic_name);
-	if (it != topics_.end()){
+	if (it != topics_.end()) {
 		return Topic::_duplicate(it->second.in());
 	}
 	return NULL;

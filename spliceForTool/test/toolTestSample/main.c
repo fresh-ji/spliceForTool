@@ -2,7 +2,6 @@
 #include <tchar.h>
 #include <Windows.h>
 #include <stdio.h>
-#include <iostream>
 
 /**** 预留勿改 ****/
 // 回调定义
@@ -31,7 +30,6 @@ int endFlag = 0;
 struct data {
 	double d;
 	int i;
-	std::string s;
 } data_;
 
 /**** TODO 在这定义数据结构 ****/
@@ -61,12 +59,7 @@ void setFinish(double time) {
 
 	data_.d = 3.0;
 	data_.i = 9;
-	data_.s = "hello";
 	setFun("io", (void*)&data_);
-
-	std::string ss = "world";
-
-	setFun("ss", (void*)&ss);
 
 	/**** TODO 在这进行步长推进和数据发送 ****/
 	/**** 预留勿改 ****/
