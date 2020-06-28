@@ -149,7 +149,7 @@ bool Interface::advance() {
 
 bool Interface::end() {
 	try {
-		if (!publish(NODE_END, nodeName)) {
+		if (!publish(NODE_END, "die")) {
 			string msg = systemId + " request end " + to_string(currentTime);
 			LogDDSErr(msg);
 			return false;
